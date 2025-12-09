@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="es" class="">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <title>Red de instalaciones</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
     /* ==========================
        VARIABLES DE COLOR (CLARO)
@@ -124,6 +125,7 @@
       margin-top: 0.4rem;
       color: var(--color-muted);
       max-width: 700px;
+      font-size: 0.94rem;
     }
 
     .alert {
@@ -137,12 +139,9 @@
     }
 
     /* ==========================
-       FILTROS STICKY COLAPSABLES
+       FILTROS COLAPSABLES (NO STICKY)
        ========================== */
     .filters-wrapper {
-      position: sticky;
-      top: 0.75rem;
-      z-index: 20;
       margin-bottom: 1.5rem;
     }
 
@@ -205,7 +204,7 @@
     }
 
     .filters-card.collapsed {
-      transform: translateY(-4px);
+      transform: translateY(-2px);
     }
 
     .filters-card.collapsed .filters-header-bar-sub {
@@ -244,14 +243,6 @@
       .filters-grid,
       .filters-grid-secondary {
         grid-template-columns: 1fr;
-      }
-    }
-
-    /* En móviles, los filtros dejan de ser sticky para no tapar el listado */
-    @media (max-width: 768px) {
-      .filters-wrapper {
-        position: static;
-        top: auto;
       }
     }
 
@@ -617,60 +608,31 @@
       background: var(--color-card);
       border-radius: 18px;
       box-shadow: var(--shadow-soft);
-      max-width: 720px;
+      max-width: 820px;
       width: 100%;
-      max-height: 86vh;
+      max-height: 88vh;
       overflow: auto;
-      padding: 1.1rem 1.2rem 1rem 1.2rem;
-      border: 1px solid rgba(148,163,184,0.35);
+      padding: 1.1rem 1.3rem 1.1rem 1.3rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
     }
 
     .detail-header {
       display: flex;
       justify-content: space-between;
-      gap: 0.5rem;
+      gap: 0.75rem;
       align-items: flex-start;
       margin-bottom: 0.4rem;
     }
 
     .detail-title {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 700;
+      margin-bottom: 0.15rem;
     }
 
-    .detail-section-title {
-      margin-top: 0.5rem;
-      font-size: 0.82rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--color-muted);
-    }
-
-    .detail-list {
+    .detail-location-line {
       font-size: 0.85rem;
-      margin-top: 0.2rem;
-    }
-
-    .detail-list p {
-      margin-top: 0.15rem;
-    }
-
-    .detail-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-      margin-top: 0.3rem;
-    }
-
-    .detail-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 0.6rem;
-      font-size: 0.8rem;
       color: var(--color-muted);
-      gap: 0.5rem;
-      flex-wrap: wrap;
     }
 
     .detail-close {
@@ -690,6 +652,118 @@
       background: rgba(148, 163, 184, 0.15);
     }
 
+    .detail-top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .detail-chip-type {
+      font-size: 0.75rem;
+      padding: 0.18rem 0.7rem;
+      border-radius: 999px;
+      background: var(--color-primary-soft);
+      color: var(--color-primary);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
+
+    @media (max-width: 768px) {
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .detail-card {
+      border-radius: 14px;
+      border: 1px solid var(--color-border-soft);
+      padding: 0.7rem 0.8rem;
+      background: radial-gradient(circle at top left,
+        rgba(148, 163, 184, 0.05), transparent);
+    }
+
+    .dark .detail-card {
+      background: radial-gradient(circle at top left,
+        rgba(15, 118, 110, 0.15), transparent);
+    }
+
+    .detail-section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .detail-list {
+      font-size: 0.86rem;
+    }
+
+    .detail-list p {
+      margin-top: 0.18rem;
+    }
+
+    .detail-list-rows {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.18rem;
+    }
+
+    .detail-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-muted);
+    }
+
+    .detail-value {
+      font-size: 0.9rem;
+    }
+
+    .detail-notes {
+      margin-top: 0.35rem;
+      font-size: 0.86rem;
+    }
+
+    .detail-contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+      align-items: center;
+    }
+
+    .detail-contact-row a {
+      text-decoration: none;
+    }
+
+    .detail-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.7rem;
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 600px) {
       .modal-card {
         max-height: 90vh;
@@ -697,6 +771,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="app-container">
     <!-- BOTÓN DE MODO OSCURO -->
@@ -719,7 +794,7 @@
       </div>
     </header>
 
-    <!-- FILTROS STICKY Y COLAPSABLES -->
+    <!-- FILTROS COLAPSABLES -->
     <div class="filters-wrapper">
       <section id="filtersCard" class="filters-card">
         <div id="filtersHeader" class="filters-header-bar">
@@ -1057,93 +1132,147 @@
         <div class="detail-header">
           <div>
             <div class="detail-title">${inst.nombre || "Instalación sin nombre"}</div>
-            <div class="card-location">${municipio} · ${provincia} · ${comunidad}</div>
-            ${direccion ? `<div class="card-location">📍 ${direccion}</div>` : ""}
+            <div class="detail-location-line">${municipio} · ${provincia} · ${comunidad}</div>
+            ${direccion ? `<div class="detail-location-line">📍 ${direccion}</div>` : ""}
           </div>
           <button type="button" class="detail-close" id="btnCerrarModal">✕ Cerrar</button>
         </div>
 
-        <div class="detail-tags">
-          ${inst.piscina ? `<span class="tag tag-positive">Piscina</span>` : ""}
-          ${inst.tiene_campo_deportivo ? `<span class="tag">Campo deportivo</span>` : ""}
-          ${inst.zona_exterior_grande ? `<span class="tag">Zona exterior grande</span>` : ""}
-          ${inst.sombra_exterior ? `<span class="tag">Sombra</span>` : ""}
-          ${inst.cocina_industrial ? `<span class="tag">Cocina industrial</span>` : ""}
-          ${inst.cocina_propia ? `<span class="tag">Cocina propia</span>` : ""}
-          ${inst.sala_multiusos ? `<span class="tag">Sala multiusos</span>` : ""}
-          ${inst.transporte_publico ? `<span class="tag">Transporte público</span>` : ""}
-          ${inst.acceso_bus ? `<span class="tag">Acceso bus</span>` : ""}
-          ${inst.parking ? `<span class="tag">Parking</span>` : ""}
-          ${inst.accesible ? `<span class="tag">Accesible</span>` : ""}
-          ${inst.alquiler_exclusivo ? `<span class="tag">Alquiler exclusivo</span>` : ""}
-          ${inst.calefaccion ? `<span class="tag">Calefacción</span>` : ""}
-          ${inst.aire_acondicionado ? `<span class="tag">Aire acondicionado</span>` : ""}
-          ${inst.vallado ? `<span class="tag">Recinto vallado</span>` : ""}
-          ${inst.zona_tiendas_campana ? `<span class="tag">Zona para tiendas</span>` : ""}
-          ${inst.espacio_intendencia ? `<span class="tag">Intendencia / botiquín</span>` : ""}
+        <div class="detail-top-row">
+          <div class="detail-tags">
+            ${inst.piscina ? `<span class="tag tag-positive">Piscina</span>` : ""}
+            ${inst.tiene_campo_deportivo ? `<span class="tag">Campo deportivo</span>` : ""}
+            ${inst.zona_exterior_grande ? `<span class="tag">Zona exterior grande</span>` : ""}
+            ${inst.sombra_exterior ? `<span class="tag">Sombra</span>` : ""}
+            ${inst.cocina_industrial ? `<span class="tag">Cocina industrial</span>` : ""}
+            ${inst.cocina_propia ? `<span class="tag">Cocina propia</span>` : ""}
+            ${inst.sala_multiusos ? `<span class="tag">Sala multiusos</span>` : ""}
+            ${inst.transporte_publico ? `<span class="tag">Transporte público</span>` : ""}
+            ${inst.acceso_bus ? `<span class="tag">Acceso bus</span>` : ""}
+            ${inst.parking ? `<span class="tag">Parking</span>` : ""}
+            ${inst.accesible ? `<span class="tag">Accesible</span>` : ""}
+            ${inst.alquiler_exclusivo ? `<span class="tag">Alquiler exclusivo</span>` : ""}
+            ${inst.calefaccion ? `<span class="tag">Calefacción</span>` : ""}
+            ${inst.aire_acondicionado ? `<span class="tag">Aire acondicionado</span>` : ""}
+            ${inst.vallado ? `<span class="tag">Recinto vallado</span>` : ""}
+            ${inst.zona_tiendas_campana ? `<span class="tag">Zona para tiendas</span>` : ""}
+            ${inst.espacio_intendencia ? `<span class="tag">Intendencia / botiquín</span>` : ""}
+          </div>
+          <div class="detail-chip-type">
+            ${inst.tipo || "Tipo sin especificar"}
+          </div>
         </div>
 
-        <div class="detail-section-title">Resumen</div>
-        <div class="detail-list">
-          <p><strong>Capacidad:</strong> ${capacidadTexto}</p>
-          <p><strong>Entorno:</strong> ${entorno}</p>
-          <p><strong>Uso principal:</strong> ${uso}</p>
-          <p><strong>Régimen:</strong> ${regimen}</p>
-        </div>
+        <div class="detail-grid">
+          <!-- Columna izquierda -->
+          <div>
+            <div class="detail-card">
+              <div class="detail-section-title">Resumen</div>
+              <div class="detail-list-rows">
+                <div>
+                  <div class="detail-label">Capacidad</div>
+                  <div class="detail-value">${capacidadTexto}</div>
+                </div>
+                <div>
+                  <div class="detail-label">Entorno</div>
+                  <div class="detail-value">${entorno}</div>
+                </div>
+                <div>
+                  <div class="detail-label">Uso principal</div>
+                  <div class="detail-value">${uso}</div>
+                </div>
+                <div>
+                  <div class="detail-label">Régimen</div>
+                  <div class="detail-value">${regimen}</div>
+                </div>
+              </div>
+            </div>
 
-        <div class="detail-section-title">Alojamiento</div>
-        <div class="detail-list">
-          <p><strong>Habitaciones:</strong> ${habitaciones || "Sin información"}</p>
-          <p><strong>Baños:</strong> ${banos || "Sin información"}</p>
-        </div>
+            <div class="detail-card" style="margin-top:0.6rem;">
+              <div class="detail-section-title">Alojamiento</div>
+              <div class="detail-list-rows">
+                <div>
+                  <div class="detail-label">Habitaciones</div>
+                  <div class="detail-value">${habitaciones || "Sin información"}</div>
+                </div>
+                <div>
+                  <div class="detail-label">Baños / duchas</div>
+                  <div class="detail-value">${banos || "Sin información"}</div>
+                </div>
+              </div>
+            </div>
 
-        <div class="detail-section-title">Distancias y servicios cercanos</div>
-        <div class="detail-list">
-          <p><strong>Supermercado:</strong> ${distSuper || "Sin información"}</p>
-          <p><strong>Centro médico:</strong> ${distCentro || "Sin información"}</p>
-        </div>
+            <div class="detail-card" style="margin-top:0.6rem;">
+              <div class="detail-section-title">Notas públicas</div>
+              <div class="detail-notes">
+                ${notasPublicas || "<span style='color:var(--color-muted);'>Sin notas añadidas todavía.</span>"}
+              </div>
+            </div>
+          </div>
 
-        <div class="detail-section-title">Normas y seguridad</div>
-        <div class="detail-list">
-          <p><strong>Restricciones / normas:</strong> ${restricciones || "Sin información"}</p>
-          <p><strong>Horarios de silencio:</strong> ${horariosSilencio || "Sin información"}</p>
-          <p><strong>Riesgos cercanos:</strong> ${riesgos || "Sin información"}</p>
-          <p><strong>Límite de grupo:</strong> ${limiteGrupos || "Sin información"}</p>
-        </div>
+          <!-- Columna derecha -->
+          <div>
+            <div class="detail-card">
+              <div class="detail-section-title">Distancias y servicios</div>
+              <div class="detail-list-rows">
+                <div>
+                  <div class="detail-label">Supermercado</div>
+                  <div class="detail-value">${distSuper || "Sin información"}</div>
+                </div>
+                <div>
+                  <div class="detail-label">Centro médico</div>
+                  <div class="detail-value">${distCentro || "Sin información"}</div>
+                </div>
+              </div>
+            </div>
 
-        ${notasPublicas ? `
-          <div class="detail-section-title">Notas públicas</div>
-          <div class="detail-list">
-            <p>${notasPublicas}</p>
-          </div>` : ""}
+            <div class="detail-card" style="margin-top:0.6rem;">
+              <div class="detail-section-title">Normas y seguridad</div>
+              <div class="detail-list">
+                <p><span class="detail-label">Restricciones</span><br>
+                  <span class="detail-value">${restricciones || "Sin información"}</span></p>
+                <p><span class="detail-label">Silencio</span><br>
+                  <span class="detail-value">${horariosSilencio || "Sin información"}</span></p>
+                <p><span class="detail-label">Riesgos cercanos</span><br>
+                  <span class="detail-value">${riesgos || "Sin información"}</span></p>
+                <p><span class="detail-label">Límite de grupo</span><br>
+                  <span class="detail-value">${limiteGrupos || "Sin información"}</span></p>
+              </div>
+            </div>
 
-        <div class="detail-section-title">Contacto</div>
-        <div class="detail-list">
-          <p><strong>Teléfono:</strong> ${
-            telefono
-              ? `<a href="tel:${telefono.replace(/\s+/g,'')}" onclick="event.stopPropagation()">${telefono}</a>`
-              : "Sin información"
-          }</p>
-          <p><strong>Email:</strong> ${
-            emailContacto
-              ? `<a href="mailto:${emailContacto}" onclick="event.stopPropagation()">${emailContacto}</a>`
-              : "Sin información"
-          }</p>
-        </div>
+            <div class="detail-card" style="margin-top:0.6rem;">
+              <div class="detail-section-title">Contacto</div>
+              <div class="detail-list">
+                <p><span class="detail-label">Teléfono</span><br>
+                  <span class="detail-value">${
+                    telefono
+                      ? `<a href="tel:${telefono.replace(/\s+/g,'')}" onclick="event.stopPropagation()">${telefono}</a>`
+                      : "Sin información"
+                  }</span></p>
+                <p><span class="detail-label">Email</span><br>
+                  <span class="detail-value">${
+                    emailContacto
+                      ? `<a href="mailto:${emailContacto}" onclick="event.stopPropagation()">${emailContacto}</a>`
+                      : "Sin información"
+                  }</span></p>
+              </div>
 
-        <div class="detail-section-title">Enlaces</div>
-        <div class="detail-list">
-          <p>
-            <a href="${mapsUrl}" onclick="event.stopPropagation()" target="_blank" rel="noopener noreferrer"
-               class="btn btn-primary" style="padding:0.3rem 0.8rem; font-size:0.8rem;">
-              Ver en Maps
-            </a>
-            ${webOficial ? `
-              <a href="${webOficial}" onclick="event.stopPropagation()" target="_blank" rel="noopener noreferrer"
-                 class="btn btn-secondary" style="padding:0.3rem 0.8rem; font-size:0.8rem; margin-left:0.3rem;">
-                Web oficial
-              </a>` : ""}
-          </p>
+              <div class="detail-contact-row">
+                <a href="${mapsUrl}" onclick="event.stopPropagation()" target="_blank" rel="noopener noreferrer"
+                   class="btn btn-primary" style="padding:0.35rem 0.9rem; font-size:0.8rem;">
+                  Ver en Maps
+                </a>
+                ${
+                  webOficial
+                    ? `<a href="${webOficial}" onclick="event.stopPropagation()" target="_blank" rel="noopener noreferrer"
+                           class="btn btn-secondary" style="padding:0.35rem 0.9rem; font-size:0.8rem;">
+                         Web oficial
+                       </a>`
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="detail-footer">
