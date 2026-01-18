@@ -1,1174 +1,219 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Administrador de instalaciones</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    /* ==========================
-       PALETA (MODO CLARO POR DEFECTO)
-       ========================== */
-    :root {
-      --bg: #f4f5f7;
-      --bg-gradient1: #e0f2fe;
-      --bg-gradient2: #f4f5f7;
-      --card: #ffffff;
-      --border: #e5e7eb;
-      --primary: #2563eb;
-      --primary-soft: #dbeafe;
-      --text: #111827;
-      --muted: #6b7280;
-      --danger: #f97373;
-      --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
-    }
+<meta charset="UTF-8">
+<title>Admin – Red de instalaciones</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* ==========================
-       MODO OSCURO (adminTheme = dark)
-       ========================== */
-    html.dark {
-      --bg: #020617;
-      --bg-gradient1: #020617;
-      --bg-gradient2: #020617;
-      --card: #020617;
-      --border: #1f2937;
-      --primary: #22c55e;
-      --primary-soft: #052e16;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --danger: #f97373;
-      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.8);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, var(--bg-gradient1), var(--bg-gradient2));
-      color: var(--text);
-      padding: 1.5rem;
-    }
-
-    .app {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      font-size: 1.6rem;
-      margin-bottom: 0.4rem;
-    }
-
-    p {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      padding: 1rem 1.2rem;
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 1rem;
-    }
-
-    .card-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .small {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    /* ==========================
-       BOTÓN MODO OSCURO ADMIN
-       ========================== */
-    .top-bar {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 0.75rem;
-    }
-
-    .theme-toggle {
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 0.35rem 0.8rem;
-      font-size: 0.82rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
-      color: var(--text);
-      transition: 0.2s ease;
-    }
-
-    html.dark .theme-toggle {
-      background: rgba(15, 23, 42, 0.9);
-    }
-
-    .theme-toggle:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.25);
-    }
-
-    /* ==========================
-       LAYOUT ADMIN (SIDEBAR + PANEL)
-       ========================== */
-    .admin-layout {
-      display: grid;
-      grid-template-columns: 220px minmax(0, 1fr);
-      gap: 1rem;
-    }
-
-    @media (max-width: 900px) {
-      .admin-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .sidebar {
-      background: var(--card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      padding: 0.6rem;
-      box-shadow: var(--shadow-soft);
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      height: fit-content;
-    }
-
-    .sidebar-title {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 0.3rem;
-      padding-inline: 0.2rem;
-    }
-
-    .sidebar-btn {
-      border-radius: 999px;
-      border: 1px solid transparent;
-      padding: 0.45rem 0.7rem;
-      background: transparent;
-      color: var(--muted);
-      font-size: 0.85rem;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.08s;
-    }
-
-    .sidebar-btn span.icon {
-      font-size: 1rem;
-    }
-
-    .sidebar-btn:hover {
-      background: rgba(148, 163, 184, 0.15);
-    }
-
-    .sidebar-btn.active {
-      background: var(--primary-soft);
-      border-color: var(--primary);
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .main-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .section-title {
-      margin-top: 0.8rem;
-      margin-bottom: 0.3rem;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-    }
-
-    .field-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 0.15rem;
-    }
-
-    .field {
-      margin-bottom: 0.5rem;
-    }
-
-    .input,
-    .select,
-    .textarea {
-      width: 100%;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #f9fafb;
-      color: var(--text);
-      padding: 0.45rem 0.8rem;
-      font-size: 0.9rem;
-      outline: none;
-      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-    }
-
-    html.dark .input,
-    html.dark .select,
-    html.dark .textarea {
-      background: #020617;
-    }
-
-    .textarea {
-      border-radius: 10px;
-      min-height: 70px;
-      resize: vertical;
-      padding: 0.5rem 0.7rem;
-      line-height: 1.4;
-    }
-
-    .input:focus,
-    .select:focus,
-    .textarea:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px var(--primary-soft);
-      background: #ffffff;
-    }
-
-    html.dark .input:focus,
-    html.dark .select:focus,
-    html.dark .textarea:focus {
-      background: #020617;
-    }
-
-    .row {
-      display: flex;
-      gap: 0.6rem;
-    }
-
-    .row > div {
-      flex: 1;
-    }
-
-    @media (max-width: 700px) {
-      .row {
-        flex-direction: column;
-      }
-    }
-
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      font-size: 0.8rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .checkbox-group label {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.2rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #f9fafb;
-      cursor: pointer;
-    }
-
-    html.dark .checkbox-group label {
-      background: #020617;
-    }
-
-    .checkbox-group input {
-      accent-color: var(--primary);
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 0.6rem;
-      margin-top: 0.8rem;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border: none;
-      border-radius: 999px;
-      padding: 0.45rem 1rem;
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      white-space: nowrap;
-      text-decoration: none;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #ffffff;
-      font-weight: 600;
-    }
-
-    .btn-secondary {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    html.dark .btn-secondary {
-      background: #020617;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      font-size: 0.8rem;
-      padding-inline: 0.7rem;
-    }
-
-    .status {
-      margin-top: 0.7rem;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .status.error {
-      color: var(--danger);
-    }
-
-    .tag-list {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    /* ==========================
-       PANELES DE MODO (NUEVO/EDITAR/BORRAR)
-       ========================== */
-    .mode-panel {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 0.3rem;
-    }
-
-    .mode-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      padding: 0.15rem 0.55rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.4rem;
-      color: var(--muted);
-    }
-
-    .edit-list {
-      margin-top: 0.4rem;
-      font-size: 0.85rem;
-    }
-
-    .edit-list select {
-      margin-top: 0.25rem;
-    }
-
-    .delete-list {
-      margin-top: 0.4rem;
-      max-height: 260px;
-      overflow: auto;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 0.4rem;
-      background: rgba(15, 23, 42, 0.02);
-    }
-
-    .delete-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.25rem 0.3rem;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-      font-size: 0.83rem;
-    }
-
-    .delete-item:last-child {
-      border-bottom: none;
-    }
-
-    .btn-danger {
-      background: #f97373;
-      color: #111827;
-    }
-
-  </style>
+<style>
+:root{
+  --bg:#f4f5f7;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#6b7280;
+  --primary:#2563eb;
+  --border:#e5e7eb;
+}
+.dark{
+  --bg:#020617;
+  --card:#0f172a;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --primary:#22c55e;
+  --border:#1f2937;
+}
+body{
+  margin:0;
+  font-family:system-ui,Segoe UI;
+  background:var(--bg);
+  color:var(--text);
+  padding:1rem;
+}
+.card{
+  max-width:700px;
+  margin:0 auto 1rem auto;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:1rem;
+}
+h1{font-size:1.3rem;margin-bottom:.4rem}
+label{font-size:.75rem;color:var(--muted)}
+input,select{
+  width:100%;
+  padding:.45rem .7rem;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+}
+.row{display:flex;gap:.5rem}
+.row>div{flex:1}
+button{
+  border:none;
+  border-radius:999px;
+  padding:.45rem .9rem;
+  cursor:pointer;
+}
+.primary{background:var(--primary);color:white}
+.secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
+.small{font-size:.8rem;color:var(--muted)}
+.topbar{display:flex;justify-content:flex-end;margin-bottom:.5rem}
+</style>
 </head>
+
 <body>
-  <div class="app">
-    <!-- BOTÓN MODO OSCURO ADMIN -->
-    <div class="top-bar">
-      <button id="adminThemeToggle" class="theme-toggle" type="button">
-        <span id="adminThemeIcon">🌞</span>
-        <span id="adminThemeText">Modo oscuro</span>
-      </button>
+
+<div class="topbar">
+  <button id="themeBtn" class="secondary">🌙 Tema</button>
+</div>
+
+<div class="card" id="loginCard">
+  <h1>Acceso administrador</h1>
+  <input id="loginEmail" placeholder="Email">
+  <input id="loginPass" type="password" placeholder="Contraseña" style="margin-top:.4rem">
+  <button id="loginBtn" class="primary" style="margin-top:.6rem">Entrar</button>
+  <div id="loginStatus" class="small"></div>
+</div>
+
+<div class="card" id="adminCard" style="display:none">
+  <h1>Nueva instalación</h1>
+
+  <label>Nombre</label>
+  <input id="nombre">
+
+  <div class="row">
+    <div>
+      <label>Comunidad</label>
+      <input id="comunidad">
     </div>
-
-    <h1>Administrador de instalaciones</h1>
-    <p>Zona privada para añadir, editar y borrar instalaciones de Firestore. Debe iniciarse sesión para poder usar el panel.</p>
-
-    <!-- TARJETA DE LOGIN -->
-    <div id="loginCard" class="card">
-      <div class="card-header-row">
-        <div class="card-title">Acceso</div>
-      </div>
-      <p class="small">
-        Inicia sesión con correo y contraseña configurados en Firebase Authentication (Email/Password).
-      </p>
-      <form id="loginForm">
-        <div class="field">
-          <div class="field-label">Correo electrónico</div>
-          <input id="loginEmail" class="input" type="email" required placeholder="tu_correo@ejemplo.com" />
-        </div>
-        <div class="field">
-          <div class="field-label">Contraseña</div>
-          <input id="loginPassword" class="input" type="password" required placeholder="********" />
-        </div>
-        <div class="btn-row">
-          <button type="submit" class="btn btn-primary">Iniciar sesión</button>
-        </div>
-        <div id="loginStatus" class="status"></div>
-      </form>
-    </div>
-
-    <!-- TARJETA DE ADMIN COMPLETO (OCULTA SI NO HAY LOGIN) -->
-    <div id="adminCard" class="card" style="display:none;">
-      <div class="card-header-row">
-        <div class="card-title">Gestión de instalaciones</div>
-        <button id="btnLogout" type="button" class="btn btn-ghost">Cerrar sesión</button>
-      </div>
-      <p class="small" id="userInfo"></p>
-
-      <div class="admin-layout">
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-          <div class="sidebar-title">Acciones</div>
-          <button type="button" class="sidebar-btn active" data-mode="nuevo" id="btnModeNuevo">
-            <span class="icon">➕</span> Nueva instalación
-          </button>
-          <button type="button" class="sidebar-btn" data-mode="editar" id="btnModeEditar">
-            <span class="icon">✏️</span> Editar instalación
-          </button>
-          <button type="button" class="sidebar-btn" data-mode="borrar" id="btnModeBorrar">
-            <span class="icon">🗑️</span> Borrar instalación
-          </button>
-        </aside>
-
-        <!-- PANEL PRINCIPAL -->
-        <main class="main-panel">
-          <!-- Panel modo NUEVO -->
-          <section id="panelNuevo" class="mode-panel">
-            <div class="mode-badge">Modo · Nueva instalación</div>
-            <p class="small">
-              Rellena los datos de una nueva instalación. Cualquier campo que no se conozca se guardará como
-              “Sin información”.
-            </p>
-          </section>
-
-          <!-- Panel modo EDITAR -->
-          <section id="panelEditar" class="mode-panel" style="display:none;">
-            <div class="mode-badge">Modo · Editar instalación</div>
-            <div class="edit-list">
-              <div class="field-label">Selecciona instalación a editar</div>
-              <select id="selectEditar" class="select">
-                <option value="">Elige una instalación…</option>
-              </select>
-              <div class="small" style="margin-top:0.3rem;">
-                Al seleccionar, se cargarán los datos en el formulario de abajo. Luego pulsa “Guardar cambios”.
-              </div>
-            </div>
-          </section>
-
-          <!-- Panel modo BORRAR -->
-          <section id="panelBorrar" class="mode-panel" style="display:none;">
-            <div class="mode-badge">Modo · Borrar instalación</div>
-            <p class="small">
-              Selecciona una instalación para eliminarla de la base de datos. Esta acción no se puede deshacer.
-            </p>
-            <div id="deleteList" class="delete-list">
-              <!-- Aquí se cargan las instalaciones con botón borrar -->
-            </div>
-          </section>
-
-          <!-- FORMULARIO (SE USA PARA NUEVO Y EDITAR) -->
-          <form id="formInstalacion">
-            <!-- =====================
-                 IDENTIFICACIÓN BÁSICA
-                 ===================== -->
-            <div class="section-title">Identificación</div>
-
-            <div class="field">
-              <div class="field-label">Nombre de la instalación *</div>
-              <input id="nombre" class="input" type="text" required placeholder="Ej: Albergue Santa María del Valle" />
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Comunidad autónoma</div>
-                <select id="comunidad" class="select">
-                  <option value="">Sin especificar</option>
-                  <option value="Andalucía">Andalucía</option>
-                  <option value="Aragón">Aragón</option>
-                  <option value="Asturias">Asturias</option>
-                  <option value="Islas Baleares">Islas Baleares</option>
-                  <option value="Canarias">Canarias</option>
-                  <option value="Cantabria">Cantabria</option>
-                  <option value="Castilla-La Mancha">Castilla-La Mancha</option>
-                  <option value="Castilla y León">Castilla y León</option>
-                  <option value="Cataluña">Cataluña</option>
-                  <option value="Comunidad Valenciana">Comunidad Valenciana</option>
-                  <option value="Extremadura">Extremadura</option>
-                  <option value="Galicia">Galicia</option>
-                  <option value="Comunidad de Madrid">Comunidad de Madrid</option>
-                  <option value="Región de Murcia">Región de Murcia</option>
-                  <option value="Navarra">Navarra</option>
-                  <option value="País Vasco">País Vasco</option>
-                  <option value="La Rioja">La Rioja</option>
-                  <option value="Ceuta">Ceuta</option>
-                  <option value="Melilla">Melilla</option>
-                </select>
-              </div>
-              <div class="field">
-                <div class="field-label">Provincia</div>
-                <input id="provincia" class="input" type="text" placeholder="Ej: León" />
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Municipio / pueblo</div>
-                <input id="municipio" class="input" type="text" placeholder="Ej: Cistierna" />
-              </div>
-              <div class="field">
-                <div class="field-label">Dirección (si se conoce)</div>
-                <input id="direccion" class="input" type="text" placeholder="Calle, km, parroquia..." />
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Tipo</div>
-                <select id="tipo" class="select">
-                  <option value="">Sin especificar</option>
-                  <option value="Albergue">Albergue</option>
-                  <option value="Campamento">Campamento</option>
-                  <option value="Casa rural">Casa rural</option>
-                  <option value="Residencia">Residencia</option>
-                  <option value="Otro">Otro</option>
-                </select>
-              </div>
-              <div class="field">
-                <div class="field-label">Entorno</div>
-                <select id="entorno" class="select">
-                  <option value="">Sin especificar</option>
-                  <option value="Montaña">Montaña</option>
-                  <option value="Playa">Playa</option>
-                  <option value="Rural">Rural</option>
-                  <option value="Urbano">Urbano</option>
-                  <option value="Otro">Otro</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Uso principal</div>
-                <select id="uso_principal" class="select">
-                  <option value="">Sin especificar</option>
-                  <option value="Campamento de verano">Campamento de verano</option>
-                  <option value="Convivencia fin de semana">Convivencia fin de semana</option>
-                  <option value="Retiro / espiritualidad">Retiro / espiritualidad</option>
-                  <option value="Formación">Formación</option>
-                  <option value="Multiuso">Multiuso</option>
-                </select>
-              </div>
-              <div class="field">
-                <div class="field-label">Régimen</div>
-                <select id="regimen" class="select">
-                  <option value="">Sin especificar</option>
-                  <option value="PC">Pensión completa</option>
-                  <option value="MP">Media pensión</option>
-                  <option value="SA">Solo alojamiento</option>
-                  <option value="Alquiler íntegro">Alquiler íntegro</option>
-                  <option value="Otro">Otro</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- CONTACTO -->
-            <div class="section-title">Contacto</div>
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Teléfono</div>
-                <input id="telefono" class="input" type="text" placeholder="Ej: 600 123 456" />
-              </div>
-              <div class="field">
-                <div class="field-label">Email de contacto</div>
-                <input id="email_contacto" class="input" type="email" placeholder="Ej: reservas@albergue.com" />
-              </div>
-            </div>
-
-            <div class="field">
-              <div class="field-label">Web oficial (si tiene)</div>
-              <input id="web_oficial" class="input" type="url" placeholder="https://..." />
-            </div>
-
-            <!-- CAPACIDAD -->
-            <div class="section-title">Capacidad y estancias</div>
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Plazas mínimas recomendadas</div>
-                <input id="plazas_min" class="input" type="number" min="0" placeholder="Ej: 40" />
-              </div>
-              <div class="field">
-                <div class="field-label">Plazas máximas aproximadas</div>
-                <input id="plazas_max" class="input" type="number" min="0" placeholder="Ej: 120" />
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Nº de habitaciones / salas de dormir</div>
-                <input id="habitaciones" class="input" type="text" placeholder="Ej: 10 habitaciones de 8" />
-              </div>
-              <div class="field">
-                <div class="field-label">Baños / duchas</div>
-                <input id="banos" class="input" type="text" placeholder="Ej: 6 baños y 10 duchas" />
-              </div>
-            </div>
-
-            <!-- SERVICIOS CERCANOS -->
-            <div class="section-title">Servicios cercanos</div>
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Distancia a supermercado</div>
-                <input id="distancia_supermercado" class="input" type="text" placeholder="Ej: 5 km en coche" />
-              </div>
-              <div class="field">
-                <div class="field-label">Distancia a centro médico</div>
-                <input id="distancia_centro_medico" class="input" type="text" placeholder="Ej: 20 min en coche" />
-              </div>
-            </div>
-
-            <!-- NORMAS / SEGURIDAD -->
-            <div class="section-title">Normas y seguridad</div>
-            <div class="field">
-              <div class="field-label">Restricciones / normas relevantes</div>
-              <textarea id="restricciones" class="textarea" placeholder="Ej: Silencio a partir de las 23:00, no se puede usar piscina por la noche..."></textarea>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Horarios de silencio</div>
-                <input id="horarios_silencio" class="input" type="text" placeholder="Ej: 23:00–8:00" />
-              </div>
-              <div class="field">
-                <div class="field-label">Límite de tamaño de grupo</div>
-                <input id="limite_grupos" class="input" type="text" placeholder="Ej: Máx. 80 personas por grupo" />
-              </div>
-            </div>
-
-            <div class="field">
-              <div class="field-label">Riesgos cercanos</div>
-              <textarea id="riesgos_cercanos" class="textarea" placeholder="Río cercano, carretera, barranco, etc."></textarea>
-            </div>
-
-            <!-- CARACTERÍSTICAS -->
-            <div class="section-title">Características de la instalación</div>
-            <div class="checkbox-group">
-              <label><input id="piscina" type="checkbox" />Piscina</label>
-              <label><input id="tiene_campo_deportivo" type="checkbox" />Campo deportivo</label>
-              <label><input id="zona_exterior_grande" type="checkbox" />Zona exterior grande</label>
-              <label><input id="sombra_exterior" type="checkbox" />Zona con sombra</label>
-              <label><input id="cocina_industrial" type="checkbox" />Cocina industrial</label>
-              <label><input id="cocina_propia" type="checkbox" />Cocina propia</label>
-              <label><input id="sala_multiusos" type="checkbox" />Sala multiusos</label>
-              <label><input id="transporte_publico" type="checkbox" />Transporte público cercano</label>
-              <label><input id="acceso_bus" type="checkbox" />Acceso bus grande</label>
-              <label><input id="parking" type="checkbox" />Parking</label>
-              <label><input id="accesible" type="checkbox" />Accesible</label>
-              <label><input id="alquiler_exclusivo" type="checkbox" />Alquiler exclusivo</label>
-              <label><input id="calefaccion" type="checkbox" />Calefacción</label>
-              <label><input id="aire_acondicionado" type="checkbox" />Aire acondicionado</label>
-              <label><input id="vallado" type="checkbox" />Recinto vallado</label>
-              <label><input id="zona_tiendas_campana" type="checkbox" />Zona para montar tiendas</label>
-              <label><input id="espacio_intendencia" type="checkbox" />Espacio intendencia / botiquín</label>
-            </div>
-
-            <!-- NOTAS / VALORACIÓN -->
-            <div class="section-title">Notas internas / valoración</div>
-            <div class="field">
-              <div class="field-label">Notas públicas (lo que verán los demás)</div>
-              <textarea id="notas_publicas" class="textarea" placeholder="Ej: Muy buen trato, perfecto para grupos de 50–70, recomendable para monitores novatos..."></textarea>
-            </div>
-
-            <div class="row">
-              <div class="field">
-                <div class="field-label">Valoración interna (1–5)</div>
-                <input id="valoracion_interna" class="input" type="number" min="0" max="5" step="1" placeholder="Ej: 4" />
-              </div>
-            </div>
-
-            <div class="section-title">Acciones</div>
-            <div class="btn-row">
-              <button type="submit" id="btnGuardar" class="btn btn-primary">Guardar instalación</button>
-              <button type="button" id="btnLimpiar" class="btn btn-secondary">Limpiar formulario</button>
-            </div>
-
-            <div id="status" class="status"></div>
-
-            <div class="section-title">Recordatorio</div>
-            <div class="tag-list">
-              Campos que no se conozcan: déjalos vacíos, el sistema los tratará como “Sin información”.
-            </div>
-          </form>
-        </main>
-      </div>
+    <div>
+      <label>Provincia</label>
+      <input id="provincia">
     </div>
   </div>
 
-  <!-- Firebase compat -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <label>Municipio</label>
+  <input id="municipio">
 
-  <script>
-    // ==========================
-    // CONFIG FIREBASE (MISMA QUE EN LA WEB PÚBLICA)
-    // ==========================
-    const firebaseConfig = {
-      apiKey: "AIzaSyD_qFTqRsPwHTO9P8nyfikyWSAV1kt7k90",
-      authDomain: "red-albergues.firebaseapp.com",
-      projectId: "red-albergues",
-      storageBucket: "red-albergues.firebasestorage.app",
-      messagingSenderId: "325280024828",
-      appId: "1:325280024828:web:1bc121e6089e105d386f79",
-      measurementId: "G-JZXCJFMMEB"
-    };
+  <label>Dirección</label>
+  <input id="direccion">
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+  <div class="row">
+    <div>
+      <label>Latitud</label>
+      <input id="lat">
+    </div>
+    <div>
+      <label>Longitud</label>
+      <input id="lng">
+    </div>
+  </div>
 
-    // ==========================
-    // MODO OSCURO ADMIN (INDEPENDIENTE)
-    // ==========================
-    const adminThemeToggle = document.getElementById("adminThemeToggle");
-    const adminThemeIcon = document.getElementById("adminThemeIcon");
-    const adminThemeText = document.getElementById("adminThemeText");
+  <div class="row" style="margin-top:.5rem">
+    <button id="geoBtn" class="secondary">📍 Obtener coordenadas</button>
+    <button id="geoClear" class="secondary">🧹 Borrar</button>
+  </div>
 
-    function applyAdminTheme(theme) {
-      const html = document.documentElement;
-      if (theme === "dark") {
-        html.classList.add("dark");
-        adminThemeIcon.textContent = "🌙";
-        adminThemeText.textContent = "Modo claro";
-      } else {
-        html.classList.remove("dark");
-        adminThemeIcon.textContent = "🌞";
-        adminThemeText.textContent = "Modo oscuro";
-      }
-      localStorage.setItem("adminTheme", theme);
+  <div id="geoMsg" class="small"></div>
+
+  <button id="saveBtn" class="primary" style="margin-top:.8rem">Guardar</button>
+  <div id="saveMsg" class="small"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* FIREBASE */
+firebase.initializeApp({
+  apiKey: "AIzaSyD_qFTqRsPwHTO9P8nyfikyWSAV1kt7k90",
+  authDomain: "red-albergues.firebaseapp.com",
+  projectId: "red-albergues"
+});
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+/* THEME */
+const html=document.documentElement;
+document.getElementById("themeBtn").onclick=()=>{
+  html.classList.toggle("dark");
+};
+
+/* LOGIN */
+loginBtn.onclick=async()=>{
+  try{
+    await auth.signInWithEmailAndPassword(loginEmail.value,loginPass.value);
+  }catch(e){
+    loginStatus.textContent=e.message;
+  }
+};
+auth.onAuthStateChanged(u=>{
+  loginCard.style.display=u?"none":"block";
+  adminCard.style.display=u?"block":"none";
+});
+
+/* GEOCODING */
+function buildQueries(){
+  const d=direccion.value.trim();
+  const m=municipio.value.trim();
+  const p=provincia.value.trim();
+  const c=comunidad.value.trim();
+  return [
+    [d,m,p,c],
+    [m,p,c],
+    [m,p],
+    [m]
+  ].map(a=>a.filter(Boolean).join(", ")).filter(Boolean);
+}
+
+async function geocode(q){
+  const url=`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+  const r=await fetch(url);
+  const j=await r.json();
+  if(!j.length) return null;
+  return {lat:j[0].lat,lng:j[0].lon};
+}
+
+geoBtn.onclick=async()=>{
+  geoMsg.textContent="Buscando…";
+  for(const q of buildQueries()){
+    const r=await geocode(q);
+    if(r){
+      lat.value=r.lat;
+      lng.value=r.lng;
+      geoMsg.textContent="✔ Coordenadas encontradas";
+      return;
     }
+  }
+  geoMsg.textContent="❌ No encontrado, abre OpenStreetMap";
+  window.open("https://www.openstreetmap.org/search?query="+encodeURIComponent(municipio.value));
+};
 
-    (function initAdminTheme() {
-      const stored = localStorage.getItem("adminTheme");
-      if (stored === "dark" || stored === "light") {
-        applyAdminTheme(stored);
-      } else {
-        const prefersDark = window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches;
-        applyAdminTheme(prefersDark ? "dark" : "light");
-      }
-    })();
+geoClear.onclick=()=>{
+  lat.value="";lng.value="";geoMsg.textContent="Borradas";
+};
 
-    adminThemeToggle.addEventListener("click", () => {
-      const isDark = document.documentElement.classList.contains("dark");
-      applyAdminTheme(isDark ? "light" : "dark");
+/* SAVE */
+saveBtn.onclick=async()=>{
+  try{
+    await db.collection("instalaciones").add({
+      nombre:nombre.value,
+      comunidad:comunidad.value,
+      provincia:provincia.value,
+      municipio:municipio.value,
+      direccion:direccion.value,
+      lat:lat.value?Number(lat.value):null,
+      lng:lng.value?Number(lng.value):null,
+      creado:firebase.firestore.FieldValue.serverTimestamp()
     });
-
-    // ==========================
-    // DOM LOGIN / ADMIN
-    // ==========================
-    const loginCard = document.getElementById("loginCard");
-    const adminCard = document.getElementById("adminCard");
-    const loginForm = document.getElementById("loginForm");
-    const loginEmail = document.getElementById("loginEmail");
-    const loginPassword = document.getElementById("loginPassword");
-    const loginStatus = document.getElementById("loginStatus");
-    const userInfo = document.getElementById("userInfo");
-    const btnLogout = document.getElementById("btnLogout");
-
-    const form = document.getElementById("formInstalacion");
-    const statusEl = document.getElementById("status");
-    const btnLimpiar = document.getElementById("btnLimpiar");
-    const btnGuardar = document.getElementById("btnGuardar");
-
-    // Botones modo
-    const btnModeNuevo = document.getElementById("btnModeNuevo");
-    const btnModeEditar = document.getElementById("btnModeEditar");
-    const btnModeBorrar = document.getElementById("btnModeBorrar");
-    const panelNuevo = document.getElementById("panelNuevo");
-    const panelEditar = document.getElementById("panelEditar");
-    const panelBorrar = document.getElementById("panelBorrar");
-    const selectEditar = document.getElementById("selectEditar");
-    const deleteList = document.getElementById("deleteList");
-
-    // Estado
-    let instalaciones = [];
-    let modoActual = "nuevo"; // "nuevo" | "editar" | "borrar"
-    let docActualId = null;   // Para edición
-
-    // ==========================
-    // LOGIN
-    // ==========================
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        loginCard.style.display = "none";
-        adminCard.style.display = "block";
-        userInfo.textContent = "Sesión iniciada como " + (user.email || "(usuario sin email)");
-        cargarInstalaciones();
-      } else {
-        adminCard.style.display = "none";
-        loginCard.style.display = "block";
-        userInfo.textContent = "";
-      }
-    });
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      loginStatus.textContent = "Iniciando sesión...";
-      loginStatus.classList.remove("error");
-      try {
-        const email = loginEmail.value.trim();
-        const pass = loginPassword.value;
-        await auth.signInWithEmailAndPassword(email, pass);
-        loginStatus.textContent = "";
-      } catch (error) {
-        console.error(error);
-        loginStatus.textContent = "Error al iniciar sesión: " + error.message;
-        loginStatus.classList.add("error");
-      }
-    });
-
-    btnLogout.addEventListener("click", () => {
-      auth.signOut();
-    });
-
-    // ==========================
-    // CAMBIO DE MODO (NUEVO / EDITAR / BORRAR)
-    // ==========================
-    function setModo(modo) {
-      modoActual = modo;
-      // Sidebar
-      [btnModeNuevo, btnModeEditar, btnModeBorrar].forEach(b => b.classList.remove("active"));
-      if (modo === "nuevo") btnModeNuevo.classList.add("active");
-      if (modo === "editar") btnModeEditar.classList.add("active");
-      if (modo === "borrar") btnModeBorrar.classList.add("active");
-
-      // Paneles
-      panelNuevo.style.display = (modo === "nuevo") ? "block" : "none";
-      panelEditar.style.display = (modo === "editar") ? "block" : "none";
-      panelBorrar.style.display = (modo === "borrar") ? "block" : "none";
-
-      // Form visible solo en nuevo/editar
-      form.style.display = (modo === "borrar") ? "none" : "block";
-
-      // Texto botón guardar
-      if (modo === "nuevo") {
-        btnGuardar.textContent = "Guardar instalación";
-        docActualId = null;
-        limpiarFormulario();
-      } else if (modo === "editar") {
-        btnGuardar.textContent = "Guardar cambios";
-        statusEl.textContent = "Selecciona una instalación en la lista superior para cargar sus datos.";
-        statusEl.classList.remove("error");
-      } else {
-        statusEl.textContent = "";
-        statusEl.classList.remove("error");
-      }
-    }
-
-    btnModeNuevo.addEventListener("click", () => setModo("nuevo"));
-    btnModeEditar.addEventListener("click", () => setModo("editar"));
-    btnModeBorrar.addEventListener("click", () => setModo("borrar"));
-
-    // ==========================
-    // HELPERS FORMULARIO
-    // ==========================
-    function valOrSinInfo(el) {
-      const v = el.value.trim();
-      return v === "" ? "Sin información" : v;
-    }
-
-    function limpiarFormulario() {
-      form.reset();
-      statusEl.textContent = "";
-      statusEl.classList.remove("error");
-    }
-
-    btnLimpiar.addEventListener("click", (e) => {
-      e.preventDefault();
-      limpiarFormulario();
-      if (modoActual === "editar") {
-        docActualId = null;
-      }
-    });
-
-    function llenarFormularioDesdeInstalacion(inst) {
-      document.getElementById("nombre").value = inst.nombre || "";
-      document.getElementById("comunidad").value = inst.comunidad && inst.comunidad !== "Sin información" ? inst.comunidad : "";
-      document.getElementById("provincia").value = inst.provincia && inst.provincia !== "Sin información" ? inst.provincia : "";
-      document.getElementById("municipio").value = inst.municipio && inst.municipio !== "Sin información" ? inst.municipio : "";
-      document.getElementById("direccion").value = inst.direccion && inst.direccion !== "Sin información" ? inst.direccion : "";
-      document.getElementById("tipo").value = inst.tipo && inst.tipo !== "Sin información" ? inst.tipo : "";
-      document.getElementById("entorno").value = inst.entorno && inst.entorno !== "Sin información" ? inst.entorno : "";
-      document.getElementById("uso_principal").value = inst.uso_principal && inst.uso_principal !== "Sin información" ? inst.uso_principal : "";
-      document.getElementById("regimen").value = inst.regimen && inst.regimen !== "Sin información" ? inst.regimen : "";
-
-      document.getElementById("telefono").value = inst.telefono && inst.telefono !== "Sin información" ? inst.telefono : "";
-      document.getElementById("email_contacto").value = inst.email_contacto && inst.email_contacto !== "Sin información" ? inst.email_contacto : "";
-      document.getElementById("web_oficial").value = inst.web_oficial && inst.web_oficial !== "Sin información" ? inst.web_oficial : "";
-
-      document.getElementById("plazas_min").value = inst.plazas_min != null ? inst.plazas_min : "";
-      document.getElementById("plazas_max").value = inst.plazas_max != null ? inst.plazas_max : "";
-      document.getElementById("habitaciones").value = inst.habitaciones && inst.habitaciones !== "Sin información" ? inst.habitaciones : "";
-      document.getElementById("banos").value = inst.banos && inst.banos !== "Sin información" ? inst.banos : "";
-
-      document.getElementById("distancia_supermercado").value = inst.distancia_supermercado && inst.distancia_supermercado !== "Sin información" ? inst.distancia_supermercado : "";
-      document.getElementById("distancia_centro_medico").value = inst.distancia_centro_medico && inst.distancia_centro_medico !== "Sin información" ? inst.distancia_centro_medico : "";
-
-      document.getElementById("restricciones").value = inst.restricciones && inst.restricciones !== "Sin información" ? inst.restricciones : "";
-      document.getElementById("horarios_silencio").value = inst.horarios_silencio && inst.horarios_silencio !== "Sin información" ? inst.horarios_silencio : "";
-      document.getElementById("limite_grupos").value = inst.limite_grupos && inst.limite_grupos !== "Sin información" ? inst.limite_grupos : "";
-      document.getElementById("riesgos_cercanos").value = inst.riesgos_cercanos && inst.riesgos_cercanos !== "Sin información" ? inst.riesgos_cercanos : "";
-
-      document.getElementById("piscina").checked = !!inst.piscina;
-      document.getElementById("tiene_campo_deportivo").checked = !!inst.tiene_campo_deportivo;
-      document.getElementById("zona_exterior_grande").checked = !!inst.zona_exterior_grande;
-      document.getElementById("sombra_exterior").checked = !!inst.sombra_exterior;
-      document.getElementById("cocina_industrial").checked = !!inst.cocina_industrial;
-      document.getElementById("cocina_propia").checked = !!inst.cocina_propia;
-      document.getElementById("sala_multiusos").checked = !!inst.sala_multiusos;
-      document.getElementById("transporte_publico").checked = !!inst.transporte_publico;
-      document.getElementById("acceso_bus").checked = !!inst.acceso_bus;
-      document.getElementById("parking").checked = !!inst.parking;
-      document.getElementById("accesible").checked = !!inst.accesible;
-      document.getElementById("alquiler_exclusivo").checked = !!inst.alquiler_exclusivo;
-      document.getElementById("calefaccion").checked = !!inst.calefaccion;
-      document.getElementById("aire_acondicionado").checked = !!inst.aire_acondicionado;
-      document.getElementById("vallado").checked = !!inst.vallado;
-      document.getElementById("zona_tiendas_campana").checked = !!inst.zona_tiendas_campana;
-      document.getElementById("espacio_intendencia").checked = !!inst.espacio_intendencia;
-
-      document.getElementById("notas_publicas").value = inst.notas_publicas && inst.notas_publicas !== "Sin información" ? inst.notas_publicas : "";
-      document.getElementById("valoracion_interna").value = inst.valoracion_interna != null ? inst.valoracion_interna : "";
-    }
-
-    // ==========================
-    // SUBMIT FORM (NUEVO / EDITAR)
-    // ==========================
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      statusEl.textContent = (modoActual === "editar") ? "Guardando cambios..." : "Guardando instalación...";
-      statusEl.classList.remove("error");
-
-      try {
-        const ahora = firebase.firestore.FieldValue.serverTimestamp();
-        const data = {
-          nombre: document.getElementById("nombre").value.trim() || "Instalación sin nombre",
-          comunidad: valOrSinInfo(document.getElementById("comunidad")),
-          provincia: valOrSinInfo(document.getElementById("provincia")),
-          municipio: valOrSinInfo(document.getElementById("municipio")),
-          direccion: valOrSinInfo(document.getElementById("direccion")),
-          tipo: valOrSinInfo(document.getElementById("tipo")),
-          entorno: valOrSinInfo(document.getElementById("entorno")),
-          uso_principal: valOrSinInfo(document.getElementById("uso_principal")),
-          regimen: valOrSinInfo(document.getElementById("regimen")),
-
-          telefono: valOrSinInfo(document.getElementById("telefono")),
-          email_contacto: valOrSinInfo(document.getElementById("email_contacto")),
-          web_oficial: valOrSinInfo(document.getElementById("web_oficial")),
-
-          plazas_min: document.getElementById("plazas_min").value ? Number(document.getElementById("plazas_min").value) : null,
-          plazas_max: document.getElementById("plazas_max").value ? Number(document.getElementById("plazas_max").value) : null,
-          habitaciones: valOrSinInfo(document.getElementById("habitaciones")),
-          banos: valOrSinInfo(document.getElementById("banos")),
-
-          distancia_supermercado: valOrSinInfo(document.getElementById("distancia_supermercado")),
-          distancia_centro_medico: valOrSinInfo(document.getElementById("distancia_centro_medico")),
-
-          restricciones: valOrSinInfo(document.getElementById("restricciones")),
-          horarios_silencio: valOrSinInfo(document.getElementById("horarios_silencio")),
-          limite_grupos: valOrSinInfo(document.getElementById("limite_grupos")),
-          riesgos_cercanos: valOrSinInfo(document.getElementById("riesgos_cercanos")),
-
-          piscina: document.getElementById("piscina").checked,
-          tiene_campo_deportivo: document.getElementById("tiene_campo_deportivo").checked,
-          zona_exterior_grande: document.getElementById("zona_exterior_grande").checked,
-          sombra_exterior: document.getElementById("sombra_exterior").checked,
-          cocina_industrial: document.getElementById("cocina_industrial").checked,
-          cocina_propia: document.getElementById("cocina_propia").checked,
-          sala_multiusos: document.getElementById("sala_multiusos").checked,
-          transporte_publico: document.getElementById("transporte_publico").checked,
-          acceso_bus: document.getElementById("acceso_bus").checked,
-          parking: document.getElementById("parking").checked,
-          accesible: document.getElementById("accesible").checked,
-          alquiler_exclusivo: document.getElementById("alquiler_exclusivo").checked,
-          calefaccion: document.getElementById("calefaccion").checked,
-          aire_acondicionado: document.getElementById("aire_acondicionado").checked,
-          vallado: document.getElementById("vallado").checked,
-          zona_tiendas_campana: document.getElementById("zona_tiendas_campana").checked,
-          espacio_intendencia: document.getElementById("espacio_intendencia").checked,
-
-          notas_publicas: valOrSinInfo(document.getElementById("notas_publicas")),
-          valoracion_interna: document.getElementById("valoracion_interna").value
-            ? Number(document.getElementById("valoracion_interna").value)
-            : null,
-
-          ultima_actualizacion: ahora
-        };
-
-        if (modoActual === "nuevo" || !docActualId) {
-          data.creado_en = ahora;
-          await db.collection("instalaciones").add(data);
-          statusEl.textContent = "Instalación guardada correctamente.";
-          limpiarFormulario();
-        } else if (modoActual === "editar" && docActualId) {
-          await db.collection("instalaciones").doc(docActualId).update(data);
-          statusEl.textContent = "Cambios guardados correctamente.";
-        }
-
-        await cargarInstalaciones(); // refresca listas
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent = "Error al guardar la instalación.";
-        statusEl.classList.add("error");
-      }
-    });
-
-    // ==========================
-    // CARGA INSTALACIONES (LISTAS EDITAR/BORRAR)
-    // ==========================
-    async function cargarInstalaciones() {
-      try {
-        const snapshot = await db.collection("instalaciones")
-          .orderBy("nombre")
-          .get();
-        instalaciones = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
-        // Rellenar select de edición
-        selectEditar.innerHTML = '<option value="">Elige una instalación…</option>';
-        instalaciones.forEach(inst => {
-          const opt = document.createElement("option");
-          opt.value = inst.id;
-          opt.textContent = inst.nombre || "Instalación sin nombre";
-          selectEditar.appendChild(opt);
-        });
-
-        // Rellenar lista de borrado
-        deleteList.innerHTML = "";
-        if (!instalaciones.length) {
-          const div = document.createElement("div");
-          div.className = "small";
-          div.textContent = "No hay instalaciones guardadas todavía.";
-          deleteList.appendChild(div);
-        } else {
-          instalaciones.forEach(inst => {
-            const row = document.createElement("div");
-            row.className = "delete-item";
-            row.innerHTML = `
-              <div>
-                <strong>${inst.nombre || "Instalación sin nombre"}</strong>
-                <div class="small">${inst.municipio || "Sin municipio"} · ${inst.provincia || "Sin provincia"}</div>
-              </div>
-              <button type="button" class="btn btn-danger" data-id="${inst.id}">Borrar</button>
-            `;
-            deleteList.appendChild(row);
-          });
-
-          // Eventos de borrado
-          deleteList.querySelectorAll("button[data-id]").forEach(btn => {
-            btn.addEventListener("click", async () => {
-              const id = btn.getAttribute("data-id");
-              const inst = instalaciones.find(i => i.id === id);
-              const nombre = inst ? (inst.nombre || "esta instalación") : "esta instalación";
-              if (!confirm(`¿Seguro que quieres borrar "${nombre}"? Esta acción no se puede deshacer.`)) {
-                return;
-              }
-              try {
-                await db.collection("instalaciones").doc(id).delete();
-                await cargarInstalaciones();
-              } catch (error) {
-                console.error(error);
-                alert("Error al borrar la instalación.");
-              }
-            });
-          });
-        }
-      } catch (err) {
-        console.error("Error cargando instalaciones:", err);
-      }
-    }
-
-    // ==========================
-    // SELECCIÓN EN MODO EDITAR
-    // ==========================
-    selectEditar.addEventListener("change", () => {
-      const id = selectEditar.value;
-      if (!id) {
-        docActualId = null;
-        limpiarFormulario();
-        statusEl.textContent = "Selecciona una instalación para cargar sus datos.";
-        statusEl.classList.remove("error");
-        return;
-      }
-      const inst = instalaciones.find(i => i.id === id);
-      if (!inst) return;
-      docActualId = id;
-      llenarFormularioDesdeInstalacion(inst);
-      statusEl.textContent = "Editando: " + (inst.nombre || "Instalación sin nombre");
-      statusEl.classList.remove("error");
-    });
-
-    // Modo inicial
-    setModo("nuevo");
-  </script>
+    saveMsg.textContent="✔ Guardado";
+  }catch(e){
+    saveMsg.textContent="Error";
+  }
+};
+</script>
 </body>
 </html>
