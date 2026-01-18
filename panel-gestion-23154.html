@@ -1,219 +1,1651 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Admin – Red de instalaciones</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Administrador de instalaciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<style>
-:root{
-  --bg:#f4f5f7;
-  --card:#ffffff;
-  --text:#111827;
-  --muted:#6b7280;
-  --primary:#2563eb;
-  --border:#e5e7eb;
-}
-.dark{
-  --bg:#020617;
-  --card:#0f172a;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --primary:#22c55e;
-  --border:#1f2937;
-}
-body{
-  margin:0;
-  font-family:system-ui,Segoe UI;
-  background:var(--bg);
-  color:var(--text);
-  padding:1rem;
-}
-.card{
-  max-width:700px;
-  margin:0 auto 1rem auto;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:1rem;
-}
-h1{font-size:1.3rem;margin-bottom:.4rem}
-label{font-size:.75rem;color:var(--muted)}
-input,select{
-  width:100%;
-  padding:.45rem .7rem;
-  border-radius:999px;
-  border:1px solid var(--border);
-  background:transparent;
-  color:var(--text);
-}
-.row{display:flex;gap:.5rem}
-.row>div{flex:1}
-button{
-  border:none;
-  border-radius:999px;
-  padding:.45rem .9rem;
-  cursor:pointer;
-}
-.primary{background:var(--primary);color:white}
-.secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
-.small{font-size:.8rem;color:var(--muted)}
-.topbar{display:flex;justify-content:flex-end;margin-bottom:.5rem}
-</style>
+  <style>
+    /* ==========================================================
+       TEMA (INDEPENDIENTE DEL INDEX)
+       - Se guarda en localStorage con clave: adminTheme
+       ========================================================== */
+    :root {
+      --bg: #f4f5f7;
+      --bg2: #e0f2fe;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+
+      --danger: #ef4444;
+      --danger-soft: #fee2e2;
+
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+      --chip: #f3f4f6;
+
+      --sidebar: rgba(255,255,255,0.7);
+      --sidebar-border: rgba(229,231,235,0.8);
+    }
+
+    .dark {
+      --bg: #020617;
+      --bg2: #020617;
+      --card: #0b1220;
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+
+      --primary: #22c55e;
+      --primary-soft: #052e16;
+
+      --danger: #f97373;
+      --danger-soft: rgba(249,115,115,0.12);
+
+      --shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+      --chip: #111827;
+
+      --sidebar: rgba(15, 23, 42, 0.85);
+      --sidebar-border: rgba(31,41,55,0.9);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, var(--bg2), var(--bg));
+      color: var(--text);
+      padding: 1.25rem;
+      line-height: 1.45;
+    }
+
+    .wrap {
+      max-width: 1250px;
+      margin: 0 auto;
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: .9rem;
+    }
+
+    .topbar h1 {
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.65);
+      padding: 0.35rem 0.8rem;
+      font-size: 0.82rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.15);
+      color: var(--text);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.2s ease, background 0.2s ease;
+      user-select: none;
+    }
+    .dark .theme-toggle { background: rgba(15, 23, 42, 0.9); }
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.25);
+      border-color: var(--primary);
+    }
+
+    /* Cards / layout */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 1rem 1.1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: sticky;
+      top: 1rem;
+      background: var(--sidebar);
+      border: 1px solid var(--sidebar-border);
+      border-radius: 18px;
+      padding: .75rem;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar .small {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-top: .35rem;
+      margin-bottom: .75rem;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      border-radius: 14px;
+      padding: .7rem .8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .6rem;
+      transition: transform 0.1s ease, border-color 0.2s ease, background 0.2s ease;
+      font-size: .92rem;
+    }
+
+    .nav button:hover {
+      transform: translateY(-1px);
+      border-color: var(--primary);
+      background: rgba(148,163,184,0.12);
+    }
+
+    .nav button.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--text);
+    }
+    .dark .nav button.active { color: var(--text); }
+
+    .logout {
+      margin-top: .75rem;
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+
+    /* Main */
+    .main .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-bottom: .65rem;
+    }
+
+    .main .title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .pill {
+      font-size: .8rem;
+      color: var(--muted);
+      background: var(--chip);
+      padding: .25rem .55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.25);
+    }
+
+    /* Forms */
+    .section-title {
+      margin-top: .9rem;
+      margin-bottom: .35rem;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .field { margin-bottom: .55rem; }
+    .field-label {
+      font-size: .82rem;
+      color: var(--muted);
+      margin-bottom: .18rem;
+    }
+
+    .input, .select, .textarea {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: .48rem .8rem;
+      font-size: .92rem;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+
+    .textarea {
+      border-radius: 12px;
+      min-height: 76px;
+      resize: vertical;
+      padding: .55rem .75rem;
+      line-height: 1.35;
+    }
+
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-soft);
+    }
+
+    .row {
+      display: flex;
+      gap: .65rem;
+    }
+    .row > div { flex: 1; }
+    @media (max-width: 820px) { .row { flex-direction: column; } }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+      font-size: .85rem;
+      margin-bottom: .6rem;
+      color: var(--muted);
+    }
+    .checkbox-group label {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .25rem .55rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.25);
+      background: var(--chip);
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-group input { accent-color: var(--primary); }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: .55rem;
+      flex-wrap: wrap;
+      margin-top: .7rem;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: .48rem 1rem;
+      font-size: .88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      white-space: nowrap;
+      transition: transform .1s, box-shadow .1s, background .1s, border-color .1s;
+      user-select: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
+    }
+    .dark .btn-primary { box-shadow: 0 10px 22px rgba(34,197,94,0.25); }
+    .btn-primary:hover { transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { border-color: var(--primary); transform: translateY(-1px); }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(239, 68, 68, 0.18);
+    }
+    .btn-danger:hover { transform: translateY(-1px); }
+
+    .status {
+      margin-top: .65rem;
+      font-size: .88rem;
+      color: var(--muted);
+    }
+    .status.error { color: var(--danger); }
+
+    /* Login */
+    .login-grid {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* Lists */
+    .list-tools {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: .75rem;
+    }
+    .search {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: .65rem;
+      margin-top: .6rem;
+    }
+
+    .item {
+      border: 1px solid rgba(148,163,184,0.25);
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.3);
+    }
+    .dark .item { background: rgba(2,6,23,0.3); }
+
+    .item-head {
+      padding: .75rem .85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: .65rem;
+      cursor: pointer;
+    }
+
+    .item-name { font-weight: 700; font-size: .95rem; }
+    .item-sub { font-size: .84rem; color: var(--muted); margin-top: .1rem; }
+
+    .item-actions {
+      display: flex;
+      gap: .45rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mini {
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      border-radius: 999px;
+      padding: .25rem .6rem;
+      font-size: .8rem;
+      cursor: pointer;
+    }
+    .mini:hover { border-color: var(--primary); }
+
+    .item-body {
+      display: none;
+      padding: .8rem .9rem 1rem .9rem;
+      border-top: 1px solid rgba(148,163,184,0.25);
+      background: rgba(255,255,255,0.55);
+    }
+    .dark .item-body { background: rgba(2,6,23,0.55); }
+
+    .item.open .item-body { display: block; }
+
+    .note {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: .35rem;
+    }
+
+    /* Small helpers */
+    .muted { color: var(--muted); }
+    .spacer { height: .4rem; }
+  </style>
 </head>
 
 <body>
-
-<div class="topbar">
-  <button id="themeBtn" class="secondary">🌙 Tema</button>
-</div>
-
-<div class="card" id="loginCard">
-  <h1>Acceso administrador</h1>
-  <input id="loginEmail" placeholder="Email">
-  <input id="loginPass" type="password" placeholder="Contraseña" style="margin-top:.4rem">
-  <button id="loginBtn" class="primary" style="margin-top:.6rem">Entrar</button>
-  <div id="loginStatus" class="small"></div>
-</div>
-
-<div class="card" id="adminCard" style="display:none">
-  <h1>Nueva instalación</h1>
-
-  <label>Nombre</label>
-  <input id="nombre">
-
-  <div class="row">
-    <div>
-      <label>Comunidad</label>
-      <input id="comunidad">
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>Admin · ProyectoAAG</h1>
+        <div class="muted" style="font-size:.9rem;">Panel privado para gestionar instalaciones en Firestore</div>
+      </div>
+      <button id="adminThemeToggle" class="theme-toggle" type="button">
+        <span id="adminThemeIcon">🌞</span>
+        <span id="adminThemeText">Modo oscuro</span>
+      </button>
     </div>
-    <div>
-      <label>Provincia</label>
-      <input id="provincia">
+
+    <!-- LOGIN (solo visible si NO hay sesión) -->
+    <div id="loginView" class="login-grid card">
+      <div class="title-row">
+        <div class="title">Acceso</div>
+        <span class="pill">Privado</span>
+      </div>
+
+      <p class="muted" style="margin-bottom:.6rem;">
+        Inicia sesión con Email/Password (Firebase Auth). Sin login no se muestra nada del panel.
+      </p>
+
+      <form id="loginForm">
+        <div class="field">
+          <div class="field-label">Correo electrónico</div>
+          <input id="loginEmail" class="input" type="email" required placeholder="tu_correo@ejemplo.com" />
+        </div>
+        <div class="field">
+          <div class="field-label">Contraseña</div>
+          <input id="loginPassword" class="input" type="password" required placeholder="********" />
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" type="submit">Iniciar sesión</button>
+        </div>
+
+        <div id="loginStatus" class="status"></div>
+      </form>
+    </div>
+
+    <!-- APP (solo visible si hay sesión) -->
+    <div id="appView" class="grid" style="display:none;">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div style="font-weight:800; font-size:1rem;">Menú</div>
+        <div class="small" id="userInfo"></div>
+
+        <div class="nav">
+          <button id="navNew" class="active" type="button">
+            <span>➕ Nueva instalación</span><span>→</span>
+          </button>
+          <button id="navEdit" type="button">
+            <span>✏️ Edición</span><span>→</span>
+          </button>
+          <button id="navDelete" type="button">
+            <span>🗑️ Borrado</span><span>→</span>
+          </button>
+        </div>
+
+        <div class="logout">
+          <button id="btnReload" type="button" class="btn btn-secondary">🔄 Recargar</button>
+          <button id="btnLogout" type="button" class="btn btn-secondary">Cerrar sesión</button>
+        </div>
+
+        <div class="note">
+          Consejo: añade <strong>lat/lng</strong> (o usa “Obtener coordenadas”) para que en el index salga el mapa con radio de 1km.
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main card">
+        <div class="title-row">
+          <div class="title" id="viewTitle">Nueva instalación</div>
+          <span class="pill" id="viewPill">Alta</span>
+        </div>
+
+        <!-- =========================
+             VISTA: NUEVA
+             ========================= -->
+        <section id="viewNew">
+          <form id="formNew">
+            <div class="section-title">Identificación</div>
+
+            <div class="field">
+              <div class="field-label">Nombre de la instalación *</div>
+              <input id="nombre" class="input" type="text" required placeholder="Ej: Albergue Santa María del Valle" />
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Comunidad autónoma</div>
+                <select id="comunidad" class="select">
+                  <option value="">Sin especificar</option>
+                  <option value="Andalucía">Andalucía</option>
+                  <option value="Aragón">Aragón</option>
+                  <option value="Asturias">Asturias</option>
+                  <option value="Islas Baleares">Islas Baleares</option>
+                  <option value="Canarias">Canarias</option>
+                  <option value="Cantabria">Cantabria</option>
+                  <option value="Castilla-La Mancha">Castilla-La Mancha</option>
+                  <option value="Castilla y León">Castilla y León</option>
+                  <option value="Cataluña">Cataluña</option>
+                  <option value="Comunidad Valenciana">Comunidad Valenciana</option>
+                  <option value="Extremadura">Extremadura</option>
+                  <option value="Galicia">Galicia</option>
+                  <option value="Comunidad de Madrid">Comunidad de Madrid</option>
+                  <option value="Región de Murcia">Región de Murcia</option>
+                  <option value="Navarra">Navarra</option>
+                  <option value="País Vasco">País Vasco</option>
+                  <option value="La Rioja">La Rioja</option>
+                  <option value="Ceuta">Ceuta</option>
+                  <option value="Melilla">Melilla</option>
+                </select>
+              </div>
+              <div class="field">
+                <div class="field-label">Provincia</div>
+                <input id="provincia" class="input" type="text" placeholder="Ej: León" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Municipio / pueblo</div>
+                <input id="municipio" class="input" type="text" placeholder="Ej: Cistierna" />
+              </div>
+              <div class="field">
+                <div class="field-label">Dirección (si se conoce)</div>
+                <input id="direccion" class="input" type="text" placeholder="Calle, km, parroquia..." />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Tipo</div>
+                <select id="tipo" class="select">
+                  <option value="">Sin especificar</option>
+                  <option value="Albergue">Albergue</option>
+                  <option value="Campamento">Campamento</option>
+                  <option value="Casa rural">Casa rural</option>
+                  <option value="Residencia">Residencia</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div class="field">
+                <div class="field-label">Entorno</div>
+                <select id="entorno" class="select">
+                  <option value="">Sin especificar</option>
+                  <option value="Montaña">Montaña</option>
+                  <option value="Playa">Playa</option>
+                  <option value="Rural">Rural</option>
+                  <option value="Urbano">Urbano</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Uso principal</div>
+                <select id="uso_principal" class="select">
+                  <option value="">Sin especificar</option>
+                  <option value="Campamento de verano">Campamento de verano</option>
+                  <option value="Convivencia fin de semana">Convivencia fin de semana</option>
+                  <option value="Retiro / espiritualidad">Retiro / espiritualidad</option>
+                  <option value="Formación">Formación</option>
+                  <option value="Multiuso">Multiuso</option>
+                </select>
+              </div>
+              <div class="field">
+                <div class="field-label">Régimen</div>
+                <select id="regimen" class="select">
+                  <option value="">Sin especificar</option>
+                  <option value="PC">Pensión completa</option>
+                  <option value="MP">Media pensión</option>
+                  <option value="SA">Solo alojamiento</option>
+                  <option value="Alquiler íntegro">Alquiler íntegro</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="section-title">Ubicación (mapa)</div>
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Latitud (lat)</div>
+                <input id="lat" class="input" type="number" step="any" placeholder="Ej: 43.361900" />
+              </div>
+              <div class="field">
+                <div class="field-label">Longitud (lng)</div>
+                <input id="lng" class="input" type="number" step="any" placeholder="Ej: -5.849400" />
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" id="btnGeo" class="btn btn-secondary">📍 Obtener coordenadas</button>
+              <button type="button" id="btnGeoClear" class="btn btn-secondary">🧹 Borrar coords</button>
+              <span class="muted" id="geoHelp" style="font-size:.85rem;"></span>
+            </div>
+
+            <div class="section-title">Contacto</div>
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Teléfono</div>
+                <input id="telefono" class="input" type="text" placeholder="Ej: 600 123 456" />
+              </div>
+              <div class="field">
+                <div class="field-label">Email de contacto</div>
+                <input id="email_contacto" class="input" type="email" placeholder="Ej: reservas@albergue.com" />
+              </div>
+            </div>
+            <div class="field">
+              <div class="field-label">Web oficial (si tiene)</div>
+              <input id="web_oficial" class="input" type="url" placeholder="https://..." />
+            </div>
+
+            <div class="section-title">Capacidad y estancias</div>
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Plazas mínimas recomendadas</div>
+                <input id="plazas_min" class="input" type="number" min="0" placeholder="Ej: 40" />
+              </div>
+              <div class="field">
+                <div class="field-label">Plazas máximas aproximadas</div>
+                <input id="plazas_max" class="input" type="number" min="0" placeholder="Ej: 120" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Nº habitaciones / salas dormir</div>
+                <input id="habitaciones" class="input" type="text" placeholder="Ej: 10 habitaciones de 8" />
+              </div>
+              <div class="field">
+                <div class="field-label">Baños / duchas</div>
+                <input id="banos" class="input" type="text" placeholder="Ej: 6 baños y 10 duchas" />
+              </div>
+            </div>
+
+            <div class="section-title">Servicios cercanos</div>
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Distancia a supermercado</div>
+                <input id="distancia_supermercado" class="input" type="text" placeholder="Ej: 5 km en coche" />
+              </div>
+              <div class="field">
+                <div class="field-label">Distancia a centro médico</div>
+                <input id="distancia_centro_medico" class="input" type="text" placeholder="Ej: 20 min en coche" />
+              </div>
+            </div>
+
+            <div class="section-title">Normas y seguridad</div>
+            <div class="field">
+              <div class="field-label">Restricciones / normas relevantes</div>
+              <textarea id="restricciones" class="textarea" placeholder="Ej: Silencio a partir de las 23:00..."></textarea>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Horarios de silencio</div>
+                <input id="horarios_silencio" class="input" type="text" placeholder="Ej: 23:00–8:00" />
+              </div>
+              <div class="field">
+                <div class="field-label">Límite de tamaño de grupo</div>
+                <input id="limite_grupos" class="input" type="text" placeholder="Ej: Máx. 80 personas" />
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">Riesgos cercanos</div>
+              <textarea id="riesgos_cercanos" class="textarea" placeholder="Río cercano, carretera, barranco..."></textarea>
+            </div>
+
+            <div class="section-title">Características</div>
+            <div class="checkbox-group">
+              <label><input id="piscina" type="checkbox" />Piscina</label>
+              <label><input id="tiene_campo_deportivo" type="checkbox" />Campo deportivo</label>
+              <label><input id="zona_exterior_grande" type="checkbox" />Zona exterior grande</label>
+              <label><input id="sombra_exterior" type="checkbox" />Zona con sombra</label>
+              <label><input id="cocina_industrial" type="checkbox" />Cocina industrial</label>
+              <label><input id="cocina_propia" type="checkbox" />Cocina propia</label>
+              <label><input id="sala_multiusos" type="checkbox" />Sala multiusos</label>
+              <label><input id="transporte_publico" type="checkbox" />Transporte público cercano</label>
+              <label><input id="acceso_bus" type="checkbox" />Acceso bus grande</label>
+              <label><input id="parking" type="checkbox" />Parking</label>
+              <label><input id="accesible" type="checkbox" />Accesible</label>
+              <label><input id="alquiler_exclusivo" type="checkbox" />Alquiler exclusivo</label>
+              <label><input id="calefaccion" type="checkbox" />Calefacción</label>
+              <label><input id="aire_acondicionado" type="checkbox" />Aire acondicionado</label>
+              <label><input id="vallado" type="checkbox" />Recinto vallado</label>
+
+              <!-- NUEVOS -->
+              <label><input id="zona_tiendas_campana" type="checkbox" />Zona para montar tiendas</label>
+              <label><input id="espacio_intendencia" type="checkbox" />Espacio intendencia / botiquín</label>
+            </div>
+
+            <div class="section-title">Notas</div>
+            <div class="field">
+              <div class="field-label">Notas públicas (lo que verán los demás)</div>
+              <textarea id="notas_publicas" class="textarea" placeholder="Ej: Muy buen trato, perfecto para grupos 50–70..."></textarea>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Valoración interna (1–5)</div>
+                <input id="valoracion_interna" class="input" type="number" min="0" max="5" step="1" placeholder="Ej: 4" />
+              </div>
+            </div>
+
+            <div class="section-title">Acciones</div>
+            <div class="btn-row">
+              <button type="submit" class="btn btn-primary">Guardar instalación</button>
+              <button type="button" id="btnLimpiar" class="btn btn-secondary">Limpiar formulario</button>
+            </div>
+
+            <div id="statusNew" class="status"></div>
+          </form>
+        </section>
+
+        <!-- =========================
+             VISTA: EDICIÓN
+             ========================= -->
+        <section id="viewEdit" style="display:none;">
+          <div class="list-tools">
+            <input id="editSearch" class="input search" type="text" placeholder="Buscar por nombre, municipio, provincia, comunidad…" />
+            <button id="btnEditRefresh" class="btn btn-secondary" type="button">🔄 Actualizar lista</button>
+          </div>
+
+          <div class="muted" style="font-size:.9rem;">
+            Pulsa una instalación para desplegar el editor. Cambia lo que necesites y guarda.
+          </div>
+
+          <div id="editList" class="list"></div>
+          <div id="editStatus" class="status"></div>
+        </section>
+
+        <!-- =========================
+             VISTA: BORRADO
+             ========================= -->
+        <section id="viewDelete" style="display:none;">
+          <div class="list-tools">
+            <input id="deleteSearch" class="input search" type="text" placeholder="Buscar para borrar…" />
+            <button id="btnDeleteRefresh" class="btn btn-secondary" type="button">🔄 Actualizar lista</button>
+          </div>
+
+          <div class="muted" style="font-size:.9rem;">
+            Borrado con confirmación. Esto elimina el documento de Firestore.
+          </div>
+
+          <div id="deleteList" class="list"></div>
+          <div id="deleteStatus" class="status"></div>
+        </section>
+      </main>
     </div>
   </div>
 
-  <label>Municipio</label>
-  <input id="municipio">
+  <!-- Firebase compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-  <label>Dirección</label>
-  <input id="direccion">
+  <script>
+    /* ==========================================================
+       CONFIG FIREBASE (TU CONFIG)
+       ========================================================== */
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_qFTqRsPwHTO9P8nyfikyWSAV1kt7k90",
+      authDomain: "red-albergues.firebaseapp.com",
+      projectId: "red-albergues",
+      storageBucket: "red-albergues.firebasestorage.app",
+      messagingSenderId: "325280024828",
+      appId: "1:325280024828:web:1bc121e6089e105d386f79",
+      measurementId: "G-JZXCJFMMEB"
+    };
 
-  <div class="row">
-    <div>
-      <label>Latitud</label>
-      <input id="lat">
-    </div>
-    <div>
-      <label>Longitud</label>
-      <input id="lng">
-    </div>
-  </div>
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-  <div class="row" style="margin-top:.5rem">
-    <button id="geoBtn" class="secondary">📍 Obtener coordenadas</button>
-    <button id="geoClear" class="secondary">🧹 Borrar</button>
-  </div>
+    /* ==========================================================
+       TEMA ADMIN (INDEPENDIENTE)
+       - localStorage key: adminTheme
+       ========================================================== */
+    const adminThemeToggle = document.getElementById("adminThemeToggle");
+    const adminThemeIcon = document.getElementById("adminThemeIcon");
+    const adminThemeText = document.getElementById("adminThemeText");
 
-  <div id="geoMsg" class="small"></div>
-
-  <button id="saveBtn" class="primary" style="margin-top:.8rem">Guardar</button>
-  <div id="saveMsg" class="small"></div>
-</div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<script>
-/* FIREBASE */
-firebase.initializeApp({
-  apiKey: "AIzaSyD_qFTqRsPwHTO9P8nyfikyWSAV1kt7k90",
-  authDomain: "red-albergues.firebaseapp.com",
-  projectId: "red-albergues"
-});
-const auth=firebase.auth();
-const db=firebase.firestore();
-
-/* THEME */
-const html=document.documentElement;
-document.getElementById("themeBtn").onclick=()=>{
-  html.classList.toggle("dark");
-};
-
-/* LOGIN */
-loginBtn.onclick=async()=>{
-  try{
-    await auth.signInWithEmailAndPassword(loginEmail.value,loginPass.value);
-  }catch(e){
-    loginStatus.textContent=e.message;
-  }
-};
-auth.onAuthStateChanged(u=>{
-  loginCard.style.display=u?"none":"block";
-  adminCard.style.display=u?"block":"none";
-});
-
-/* GEOCODING */
-function buildQueries(){
-  const d=direccion.value.trim();
-  const m=municipio.value.trim();
-  const p=provincia.value.trim();
-  const c=comunidad.value.trim();
-  return [
-    [d,m,p,c],
-    [m,p,c],
-    [m,p],
-    [m]
-  ].map(a=>a.filter(Boolean).join(", ")).filter(Boolean);
-}
-
-async function geocode(q){
-  const url=`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
-  const r=await fetch(url);
-  const j=await r.json();
-  if(!j.length) return null;
-  return {lat:j[0].lat,lng:j[0].lon};
-}
-
-geoBtn.onclick=async()=>{
-  geoMsg.textContent="Buscando…";
-  for(const q of buildQueries()){
-    const r=await geocode(q);
-    if(r){
-      lat.value=r.lat;
-      lng.value=r.lng;
-      geoMsg.textContent="✔ Coordenadas encontradas";
-      return;
+    function applyAdminTheme(theme) {
+      const html = document.documentElement;
+      if (theme === "dark") {
+        html.classList.add("dark");
+        adminThemeIcon.textContent = "🌙";
+        adminThemeText.textContent = "Modo claro";
+      } else {
+        html.classList.remove("dark");
+        adminThemeIcon.textContent = "🌞";
+        adminThemeText.textContent = "Modo oscuro";
+      }
+      localStorage.setItem("adminTheme", theme);
     }
-  }
-  geoMsg.textContent="❌ No encontrado, abre OpenStreetMap";
-  window.open("https://www.openstreetmap.org/search?query="+encodeURIComponent(municipio.value));
-};
 
-geoClear.onclick=()=>{
-  lat.value="";lng.value="";geoMsg.textContent="Borradas";
-};
+    (function initAdminTheme() {
+      const stored = localStorage.getItem("adminTheme");
+      if (stored === "dark" || stored === "light") {
+        applyAdminTheme(stored);
+      } else {
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        applyAdminTheme(prefersDark ? "dark" : "light");
+      }
+    })();
 
-/* SAVE */
-saveBtn.onclick=async()=>{
-  try{
-    await db.collection("instalaciones").add({
-      nombre:nombre.value,
-      comunidad:comunidad.value,
-      provincia:provincia.value,
-      municipio:municipio.value,
-      direccion:direccion.value,
-      lat:lat.value?Number(lat.value):null,
-      lng:lng.value?Number(lng.value):null,
-      creado:firebase.firestore.FieldValue.serverTimestamp()
+    adminThemeToggle.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      applyAdminTheme(isDark ? "light" : "dark");
     });
-    saveMsg.textContent="✔ Guardado";
-  }catch(e){
-    saveMsg.textContent="Error";
-  }
-};
-</script>
+
+    /* ==========================================================
+       LOGIN / UI
+       ========================================================== */
+    const loginView = document.getElementById("loginView");
+    const appView = document.getElementById("appView");
+    const loginForm = document.getElementById("loginForm");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginStatus = document.getElementById("loginStatus");
+
+    const userInfo = document.getElementById("userInfo");
+    const btnLogout = document.getElementById("btnLogout");
+    const btnReload = document.getElementById("btnReload");
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        loginView.style.display = "none";
+        appView.style.display = "grid";
+        userInfo.textContent = "Sesión: " + (user.email || "(sin email)");
+        // Carga inicial de listas para edición/borrado
+        refreshAllLists();
+      } else {
+        appView.style.display = "none";
+        loginView.style.display = "block";
+        userInfo.textContent = "";
+      }
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginStatus.textContent = "Iniciando sesión…";
+      loginStatus.classList.remove("error");
+      try {
+        await auth.signInWithEmailAndPassword(loginEmail.value.trim(), loginPassword.value);
+        loginStatus.textContent = "";
+      } catch (err) {
+        console.error(err);
+        loginStatus.textContent = "Error: " + err.message;
+        loginStatus.classList.add("error");
+      }
+    });
+
+    btnLogout.addEventListener("click", () => auth.signOut());
+    btnReload.addEventListener("click", () => refreshAllLists());
+
+    /* ==========================================================
+       NAVEGACIÓN
+       ========================================================== */
+    const navNew = document.getElementById("navNew");
+    const navEdit = document.getElementById("navEdit");
+    const navDelete = document.getElementById("navDelete");
+
+    const viewNew = document.getElementById("viewNew");
+    const viewEdit = document.getElementById("viewEdit");
+    const viewDelete = document.getElementById("viewDelete");
+
+    const viewTitle = document.getElementById("viewTitle");
+    const viewPill = document.getElementById("viewPill");
+
+    function setActiveNav(which) {
+      [navNew, navEdit, navDelete].forEach(b => b.classList.remove("active"));
+      viewNew.style.display = "none";
+      viewEdit.style.display = "none";
+      viewDelete.style.display = "none";
+
+      if (which === "new") {
+        navNew.classList.add("active");
+        viewNew.style.display = "block";
+        viewTitle.textContent = "Nueva instalación";
+        viewPill.textContent = "Alta";
+      }
+      if (which === "edit") {
+        navEdit.classList.add("active");
+        viewEdit.style.display = "block";
+        viewTitle.textContent = "Edición";
+        viewPill.textContent = "Modificar";
+      }
+      if (which === "delete") {
+        navDelete.classList.add("active");
+        viewDelete.style.display = "block";
+        viewTitle.textContent = "Borrado";
+        viewPill.textContent = "Eliminar";
+      }
+    }
+
+    navNew.addEventListener("click", () => setActiveNav("new"));
+    navEdit.addEventListener("click", () => setActiveNav("edit"));
+    navDelete.addEventListener("click", () => setActiveNav("delete"));
+
+    /* ==========================================================
+       HELPERS DE DATOS
+       ========================================================== */
+    function valOrSinInfo(el) {
+      const v = (el.value || "").toString().trim();
+      return v === "" ? "Sin información" : v;
+    }
+
+    function numOrNull(el) {
+      const v = (el.value || "").toString().trim();
+      if (v === "") return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function boolEl(id) {
+      return document.getElementById(id).checked;
+    }
+
+    function setElValue(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.value = (value === null || value === undefined) ? "" : value;
+    }
+
+    function setElChecked(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.checked = !!value;
+    }
+
+    /* ==========================================================
+       GEO (Nominatim) - Solo Admin
+       ========================================================== */
+    const latEl = document.getElementById("lat");
+    const lngEl = document.getElementById("lng");
+    const btnGeo = document.getElementById("btnGeo");
+    const btnGeoClear = document.getElementById("btnGeoClear");
+    const geoHelp = document.getElementById("geoHelp");
+
+    const comunidadEl = document.getElementById("comunidad");
+    const provinciaEl = document.getElementById("provincia");
+    const municipioEl = document.getElementById("municipio");
+    const direccionEl = document.getElementById("direccion");
+
+    function setGeoStatus(msg, isError = false) {
+      geoHelp.textContent = msg || "";
+      geoHelp.style.color = isError ? "var(--danger)" : "var(--muted)";
+    }
+
+    function buildGeoQueries() {
+      const comunidad = (comunidadEl.value || "").trim();
+      const provincia = (provinciaEl.value || "").trim();
+      const municipio = (municipioEl.value || "").trim();
+      const direccion = (direccionEl.value || "").trim();
+
+      const q1 = [direccion, municipio, provincia, comunidad].filter(Boolean).join(", ");
+      const q2 = [municipio, provincia, comunidad].filter(Boolean).join(", ");
+      const q3 = [municipio, provincia].filter(Boolean).join(", ");
+      const q4 = [municipio].filter(Boolean).join(", ");
+
+      const all = [q1, q2, q3, q4].map(x => x.trim()).filter(Boolean);
+      return [...new Set(all)];
+    }
+
+    async function geocodeNominatim(query) {
+      // countrycodes=es porque tu proyecto es ámbito nacional (España)
+      const url =
+        "https://nominatim.openstreetmap.org/search" +
+        "?format=jsonv2&limit=1&addressdetails=1&countrycodes=es" +
+        "&q=" + encodeURIComponent(query);
+
+      const res = await fetch(url, { headers: { "Accept": "application/json" } });
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) return null;
+
+      const item = data[0];
+      const lat = Number(item.lat);
+      const lng = Number(item.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+      return { lat, lng, display: item.display_name || query };
+    }
+
+    async function autoGeocode() {
+      setGeoStatus("Buscando coordenadas…");
+      btnGeo.disabled = true;
+
+      try {
+        const attempts = buildGeoQueries();
+        if (!attempts.length) {
+          setGeoStatus("Falta al menos el municipio para buscar.", true);
+          return;
+        }
+
+        let result = null;
+        for (const q of attempts) {
+          // pequeña pausa para ser “amable” con el servicio
+          await new Promise(r => setTimeout(r, 350));
+          result = await geocodeNominatim(q);
+          if (result) {
+            latEl.value = result.lat.toFixed(6);
+            lngEl.value = result.lng.toFixed(6);
+            setGeoStatus("✔ Coordenadas encontradas (" + q + ")");
+            return;
+          }
+        }
+
+        // fallback: abrir OSM para localizar manualmente
+        const last = attempts[attempts.length - 1];
+        setGeoStatus("No encontrado. Abro OpenStreetMap para búsqueda manual.", true);
+        window.open("https://www.openstreetmap.org/search?query=" + encodeURIComponent(last), "_blank");
+
+      } catch (e) {
+        console.error(e);
+        setGeoStatus("Error buscando coordenadas. Intenta de nuevo.", true);
+      } finally {
+        btnGeo.disabled = false;
+      }
+    }
+
+    btnGeo.addEventListener("click", autoGeocode);
+    btnGeoClear.addEventListener("click", () => {
+      latEl.value = "";
+      lngEl.value = "";
+      setGeoStatus("Coordenadas borradas.");
+    });
+
+    /* ==========================================================
+       NUEVA: GUARDAR
+       ========================================================== */
+    const formNew = document.getElementById("formNew");
+    const statusNew = document.getElementById("statusNew");
+    const btnLimpiar = document.getElementById("btnLimpiar");
+
+    function limpiarFormularioNew() {
+      formNew.reset();
+      latEl.value = "";
+      lngEl.value = "";
+      setGeoStatus("");
+      statusNew.textContent = "";
+      statusNew.classList.remove("error");
+    }
+
+    btnLimpiar.addEventListener("click", limpiarFormularioNew);
+
+    formNew.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      statusNew.textContent = "Guardando…";
+      statusNew.classList.remove("error");
+
+      try {
+        const ahora = firebase.firestore.FieldValue.serverTimestamp();
+
+        const data = {
+          nombre: (document.getElementById("nombre").value || "").trim() || "Instalación sin nombre",
+          comunidad: valOrSinInfo(document.getElementById("comunidad")),
+          provincia: valOrSinInfo(document.getElementById("provincia")),
+          municipio: valOrSinInfo(document.getElementById("municipio")),
+          direccion: valOrSinInfo(document.getElementById("direccion")),
+
+          tipo: valOrSinInfo(document.getElementById("tipo")),
+          entorno: valOrSinInfo(document.getElementById("entorno")),
+          uso_principal: valOrSinInfo(document.getElementById("uso_principal")),
+          regimen: valOrSinInfo(document.getElementById("regimen")),
+
+          // Coordenadas para mapa
+          lat: numOrNull(document.getElementById("lat")),
+          lng: numOrNull(document.getElementById("lng")),
+
+          // Contacto
+          telefono: valOrSinInfo(document.getElementById("telefono")),
+          email_contacto: valOrSinInfo(document.getElementById("email_contacto")),
+          web_oficial: valOrSinInfo(document.getElementById("web_oficial")),
+
+          // Capacidad
+          plazas_min: numOrNull(document.getElementById("plazas_min")),
+          plazas_max: numOrNull(document.getElementById("plazas_max")),
+          habitaciones: valOrSinInfo(document.getElementById("habitaciones")),
+          banos: valOrSinInfo(document.getElementById("banos")),
+
+          // Servicios
+          distancia_supermercado: valOrSinInfo(document.getElementById("distancia_supermercado")),
+          distancia_centro_medico: valOrSinInfo(document.getElementById("distancia_centro_medico")),
+
+          // Normas / seguridad
+          restricciones: valOrSinInfo(document.getElementById("restricciones")),
+          horarios_silencio: valOrSinInfo(document.getElementById("horarios_silencio")),
+          limite_grupos: valOrSinInfo(document.getElementById("limite_grupos")),
+          riesgos_cercanos: valOrSinInfo(document.getElementById("riesgos_cercanos")),
+
+          // Checks
+          piscina: boolEl("piscina"),
+          tiene_campo_deportivo: boolEl("tiene_campo_deportivo"),
+          zona_exterior_grande: boolEl("zona_exterior_grande"),
+          sombra_exterior: boolEl("sombra_exterior"),
+          cocina_industrial: boolEl("cocina_industrial"),
+          cocina_propia: boolEl("cocina_propia"),
+          sala_multiusos: boolEl("sala_multiusos"),
+          transporte_publico: boolEl("transporte_publico"),
+          acceso_bus: boolEl("acceso_bus"),
+          parking: boolEl("parking"),
+          accesible: boolEl("accesible"),
+          alquiler_exclusivo: boolEl("alquiler_exclusivo"),
+          calefaccion: boolEl("calefaccion"),
+          aire_acondicionado: boolEl("aire_acondicionado"),
+          vallado: boolEl("vallado"),
+          zona_tiendas_campana: boolEl("zona_tiendas_campana"),
+          espacio_intendencia: boolEl("espacio_intendencia"),
+
+          // Notas
+          notas_publicas: valOrSinInfo(document.getElementById("notas_publicas")),
+          valoracion_interna: numOrNull(document.getElementById("valoracion_interna")),
+
+          // Meta
+          creado_en: ahora,
+          ultima_actualizacion: ahora
+        };
+
+        await db.collection("instalaciones").add(data);
+
+        statusNew.textContent = "✔ Instalación guardada correctamente.";
+        limpiarFormularioNew();
+        refreshAllLists(); // para que aparezca en edición/borrado
+      } catch (err) {
+        console.error(err);
+        statusNew.textContent = "Error al guardar: " + (err.message || "desconocido");
+        statusNew.classList.add("error");
+      }
+    });
+
+    /* ==========================================================
+       EDICIÓN / BORRADO: CARGA DE LISTAS
+       ========================================================== */
+    const editList = document.getElementById("editList");
+    const deleteList = document.getElementById("deleteList");
+    const editSearch = document.getElementById("editSearch");
+    const deleteSearch = document.getElementById("deleteSearch");
+    const btnEditRefresh = document.getElementById("btnEditRefresh");
+    const btnDeleteRefresh = document.getElementById("btnDeleteRefresh");
+    const editStatus = document.getElementById("editStatus");
+    const deleteStatus = document.getElementById("deleteStatus");
+
+    let cacheInst = []; // cache local
+
+    async function loadAllInstalaciones() {
+      const snap = await db.collection("instalaciones").get();
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      items.sort((a,b) => (a.nombre||"").localeCompare(b.nombre||"", "es"));
+      return items;
+    }
+
+    function matchesSearch(inst, q) {
+      if (!q) return true;
+      const s = q.toLowerCase();
+      const joined = [
+        inst.nombre, inst.municipio, inst.provincia, inst.comunidad, inst.tipo, inst.entorno
+      ].map(x => (x || "") + "").join(" ").toLowerCase();
+      return joined.includes(s);
+    }
+
+    function renderEditList() {
+      const q = (editSearch.value || "").trim();
+      const list = cacheInst.filter(i => matchesSearch(i, q));
+
+      editList.innerHTML = "";
+      editStatus.textContent = list.length ? "" : "No hay coincidencias.";
+
+      list.forEach(inst => {
+        const item = document.createElement("div");
+        item.className = "item";
+
+        const comunidad = inst.comunidad || "Sin información";
+        const provincia = inst.provincia || "Sin información";
+        const municipio = inst.municipio || "Sin información";
+
+        item.innerHTML = `
+          <div class="item-head">
+            <div>
+              <div class="item-name">${inst.nombre || "Instalación sin nombre"}</div>
+              <div class="item-sub">${municipio} · ${provincia} · ${comunidad}</div>
+            </div>
+            <div class="item-actions">
+              <button class="mini" type="button" data-act="toggle">Editar</button>
+            </div>
+          </div>
+
+          <div class="item-body">
+            <div class="muted" style="font-size:.85rem; margin-bottom:.35rem;">
+              Editando ID: <span class="pill">${inst.id}</span>
+            </div>
+
+            <!-- Editor inline -->
+            <div class="section-title">Campos principales</div>
+
+            <div class="field">
+              <div class="field-label">Nombre *</div>
+              <input class="input" data-k="nombre" value="${escapeHtml(inst.nombre || "")}" />
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Comunidad</div>
+                <input class="input" data-k="comunidad" value="${escapeHtml(valueClean(inst.comunidad))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Provincia</div>
+                <input class="input" data-k="provincia" value="${escapeHtml(valueClean(inst.provincia))}" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Municipio</div>
+                <input class="input" data-k="municipio" value="${escapeHtml(valueClean(inst.municipio))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Dirección</div>
+                <input class="input" data-k="direccion" value="${escapeHtml(valueClean(inst.direccion))}" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Lat</div>
+                <input class="input" data-k="lat" type="number" step="any" value="${(typeof inst.lat === "number") ? inst.lat : ""}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Lng</div>
+                <input class="input" data-k="lng" type="number" step="any" value="${(typeof inst.lng === "number") ? inst.lng : ""}" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Tipo</div>
+                <input class="input" data-k="tipo" value="${escapeHtml(valueClean(inst.tipo))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Entorno</div>
+                <input class="input" data-k="entorno" value="${escapeHtml(valueClean(inst.entorno))}" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Uso principal</div>
+                <input class="input" data-k="uso_principal" value="${escapeHtml(valueClean(inst.uso_principal))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Régimen</div>
+                <input class="input" data-k="regimen" value="${escapeHtml(valueClean(inst.regimen))}" />
+              </div>
+            </div>
+
+            <div class="section-title">Contacto</div>
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Teléfono</div>
+                <input class="input" data-k="telefono" value="${escapeHtml(valueClean(inst.telefono))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Email</div>
+                <input class="input" data-k="email_contacto" value="${escapeHtml(valueClean(inst.email_contacto))}" />
+              </div>
+            </div>
+            <div class="field">
+              <div class="field-label">Web oficial</div>
+              <input class="input" data-k="web_oficial" value="${escapeHtml(valueClean(inst.web_oficial))}" />
+            </div>
+
+            <div class="section-title">Capacidad</div>
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Plazas min</div>
+                <input class="input" data-k="plazas_min" type="number" min="0" value="${numToVal(inst.plazas_min)}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Plazas max</div>
+                <input class="input" data-k="plazas_max" type="number" min="0" value="${numToVal(inst.plazas_max)}" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Habitaciones</div>
+                <input class="input" data-k="habitaciones" value="${escapeHtml(valueClean(inst.habitaciones))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Baños</div>
+                <input class="input" data-k="banos" value="${escapeHtml(valueClean(inst.banos))}" />
+              </div>
+            </div>
+
+            <div class="section-title">Servicios cercanos</div>
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Supermercado</div>
+                <input class="input" data-k="distancia_supermercado" value="${escapeHtml(valueClean(inst.distancia_supermercado))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Centro médico</div>
+                <input class="input" data-k="distancia_centro_medico" value="${escapeHtml(valueClean(inst.distancia_centro_medico))}" />
+              </div>
+            </div>
+
+            <div class="section-title">Normas y seguridad</div>
+            <div class="field">
+              <div class="field-label">Restricciones</div>
+              <textarea class="textarea" data-k="restricciones">${escapeHtml(valueClean(inst.restricciones))}</textarea>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Silencio</div>
+                <input class="input" data-k="horarios_silencio" value="${escapeHtml(valueClean(inst.horarios_silencio))}" />
+              </div>
+              <div class="field">
+                <div class="field-label">Límite grupo</div>
+                <input class="input" data-k="limite_grupos" value="${escapeHtml(valueClean(inst.limite_grupos))}" />
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field-label">Riesgos cercanos</div>
+              <textarea class="textarea" data-k="riesgos_cercanos">${escapeHtml(valueClean(inst.riesgos_cercanos))}</textarea>
+            </div>
+
+            <div class="section-title">Características</div>
+            <div class="checkbox-group">
+              ${checkboxTpl("piscina", inst.piscina)}
+              ${checkboxTpl("tiene_campo_deportivo", inst.tiene_campo_deportivo)}
+              ${checkboxTpl("zona_exterior_grande", inst.zona_exterior_grande)}
+              ${checkboxTpl("sombra_exterior", inst.sombra_exterior)}
+              ${checkboxTpl("cocina_industrial", inst.cocina_industrial)}
+              ${checkboxTpl("cocina_propia", inst.cocina_propia)}
+              ${checkboxTpl("sala_multiusos", inst.sala_multiusos)}
+              ${checkboxTpl("transporte_publico", inst.transporte_publico)}
+              ${checkboxTpl("acceso_bus", inst.acceso_bus)}
+              ${checkboxTpl("parking", inst.parking)}
+              ${checkboxTpl("accesible", inst.accesible)}
+              ${checkboxTpl("alquiler_exclusivo", inst.alquiler_exclusivo)}
+              ${checkboxTpl("calefaccion", inst.calefaccion)}
+              ${checkboxTpl("aire_acondicionado", inst.aire_acondicionado)}
+              ${checkboxTpl("vallado", inst.vallado)}
+              ${checkboxTpl("zona_tiendas_campana", inst.zona_tiendas_campana)}
+              ${checkboxTpl("espacio_intendencia", inst.espacio_intendencia)}
+            </div>
+
+            <div class="section-title">Notas</div>
+            <div class="field">
+              <div class="field-label">Notas públicas</div>
+              <textarea class="textarea" data-k="notas_publicas">${escapeHtml(valueClean(inst.notas_publicas))}</textarea>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <div class="field-label">Valoración (1–5)</div>
+                <input class="input" data-k="valoracion_interna" type="number" min="0" max="5" step="1" value="${numToVal(inst.valoracion_interna)}" />
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button" data-act="save">Guardar cambios</button>
+              <button class="btn btn-secondary" type="button" data-act="collapse">Cerrar editor</button>
+            </div>
+
+            <div class="status" data-k="status"></div>
+          </div>
+        `;
+
+        // eventos
+        const head = item.querySelector(".item-head");
+        const btnToggle = item.querySelector('[data-act="toggle"]');
+
+        function toggleOpen() {
+          item.classList.toggle("open");
+          btnToggle.textContent = item.classList.contains("open") ? "Cerrar" : "Editar";
+        }
+
+        head.addEventListener("click", (e) => {
+          // si se clickea un botón dentro, no duplicar
+          if (e.target && e.target.closest("button")) return;
+          toggleOpen();
+        });
+
+        btnToggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleOpen();
+        });
+
+        const btnSave = item.querySelector('[data-act="save"]');
+        const btnCollapse = item.querySelector('[data-act="collapse"]');
+        const statusEl = item.querySelector('[data-k="status"]');
+
+        btnCollapse.addEventListener("click", () => {
+          item.classList.remove("open");
+          btnToggle.textContent = "Editar";
+        });
+
+        btnSave.addEventListener("click", async () => {
+          statusEl.textContent = "Guardando…";
+          statusEl.classList.remove("error");
+
+          try {
+            const payload = collectPayloadFromEditor(item);
+
+            // actualiza timestamp
+            payload.ultima_actualizacion = firebase.firestore.FieldValue.serverTimestamp();
+
+            await db.collection("instalaciones").doc(inst.id).update(payload);
+
+            statusEl.textContent = "✔ Cambios guardados.";
+            // refresca cache
+            await refreshAllLists(true);
+          } catch (e) {
+            console.error(e);
+            statusEl.textContent = "Error guardando: " + (e.message || "desconocido");
+            statusEl.classList.add("error");
+          }
+        });
+
+        editList.appendChild(item);
+      });
+    }
+
+    function renderDeleteList() {
+      const q = (deleteSearch.value || "").trim();
+      const list = cacheInst.filter(i => matchesSearch(i, q));
+
+      deleteList.innerHTML = "";
+      deleteStatus.textContent = list.length ? "" : "No hay coincidencias.";
+
+      list.forEach(inst => {
+        const item = document.createElement("div");
+        item.className = "item";
+
+        const comunidad = inst.comunidad || "Sin información";
+        const provincia = inst.provincia || "Sin información";
+        const municipio = inst.municipio || "Sin información";
+
+        item.innerHTML = `
+          <div class="item-head">
+            <div>
+              <div class="item-name">${inst.nombre || "Instalación sin nombre"}</div>
+              <div class="item-sub">${municipio} · ${provincia} · ${comunidad}</div>
+            </div>
+            <div class="item-actions">
+              <button class="mini" type="button" data-act="ask">Borrar…</button>
+            </div>
+          </div>
+
+          <div class="item-body">
+            <div class="muted" style="font-size:.85rem;">
+              Vas a borrar: <span class="pill">${escapeHtml(inst.nombre || "")}</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-danger" type="button" data-act="confirm">🗑️ Confirmar borrado</button>
+              <button class="btn btn-secondary" type="button" data-act="cancel">Cancelar</button>
+            </div>
+            <div class="status" data-k="status"></div>
+          </div>
+        `;
+
+        const btnAsk = item.querySelector('[data-act="ask"]');
+        const btnConfirm = item.querySelector('[data-act="confirm"]');
+        const btnCancel = item.querySelector('[data-act="cancel"]');
+        const statusEl = item.querySelector('[data-k="status"]');
+        const head = item.querySelector(".item-head");
+
+        function open() {
+          item.classList.add("open");
+          btnAsk.textContent = "Cerrar";
+        }
+        function close() {
+          item.classList.remove("open");
+          btnAsk.textContent = "Borrar…";
+          statusEl.textContent = "";
+          statusEl.classList.remove("error");
+        }
+
+        head.addEventListener("click", (e) => {
+          if (e.target && e.target.closest("button")) return;
+          item.classList.contains("open") ? close() : open();
+        });
+
+        btnAsk.addEventListener("click", (e) => {
+          e.stopPropagation();
+          item.classList.contains("open") ? close() : open();
+        });
+
+        btnCancel.addEventListener("click", close);
+
+        btnConfirm.addEventListener("click", async () => {
+          statusEl.textContent = "Borrando…";
+          statusEl.classList.remove("error");
+          try {
+            await db.collection("instalaciones").doc(inst.id).delete();
+            statusEl.textContent = "✔ Borrado.";
+            await refreshAllLists(true);
+          } catch (e) {
+            console.error(e);
+            statusEl.textContent = "Error borrando: " + (e.message || "desconocido");
+            statusEl.classList.add("error");
+          }
+        });
+
+        deleteList.appendChild(item);
+      });
+    }
+
+    async function refreshAllLists(silent = false) {
+      try {
+        if (!silent) {
+          editStatus.textContent = "Cargando…";
+          deleteStatus.textContent = "Cargando…";
+        }
+        cacheInst = await loadAllInstalaciones();
+        renderEditList();
+        renderDeleteList();
+        if (!silent) {
+          editStatus.textContent = "";
+          deleteStatus.textContent = "";
+        }
+      } catch (e) {
+        console.error(e);
+        editStatus.textContent = "Error cargando lista: " + (e.message || "desconocido");
+        editStatus.classList.add("error");
+        deleteStatus.textContent = "Error cargando lista: " + (e.message || "desconocido");
+        deleteStatus.classList.add("error");
+      }
+    }
+
+    btnEditRefresh.addEventListener("click", () => refreshAllLists());
+    btnDeleteRefresh.addEventListener("click", () => refreshAllLists());
+    editSearch.addEventListener("input", renderEditList);
+    deleteSearch.addEventListener("input", renderDeleteList);
+
+    /* ==========================================================
+       EDITOR: recoger payload
+       ========================================================== */
+    function valueClean(v) {
+      // si estaba guardado como "Sin información" lo mostramos vacío en editor
+      if (v === "Sin información") return "";
+      return (v === null || v === undefined) ? "" : (v + "");
+    }
+
+    function numToVal(v) {
+      return (typeof v === "number" && Number.isFinite(v)) ? v : "";
+    }
+
+    function checkboxTpl(key, checked) {
+      // label más amigable
+      const labels = {
+        piscina: "Piscina",
+        tiene_campo_deportivo: "Campo deportivo",
+        zona_exterior_grande: "Zona exterior grande",
+        sombra_exterior: "Sombra",
+        cocina_industrial: "Cocina industrial",
+        cocina_propia: "Cocina propia",
+        sala_multiusos: "Sala multiusos",
+        transporte_publico: "Transporte público",
+        acceso_bus: "Acceso bus",
+        parking: "Parking",
+        accesible: "Accesible",
+        alquiler_exclusivo: "Alquiler exclusivo",
+        calefaccion: "Calefacción",
+        aire_acondicionado: "Aire acondicionado",
+        vallado: "Recinto vallado",
+        zona_tiendas_campana: "Zona tiendas",
+        espacio_intendencia: "Intendencia/botiquín"
+      };
+      const text = labels[key] || key;
+      const id = "chk_" + key + "_" + Math.random().toString(16).slice(2);
+      return `<label for="${id}"><input id="${id}" type="checkbox" data-k="${key}" ${checked ? "checked" : ""} />${text}</label>`;
+    }
+
+    function collectPayloadFromEditor(item) {
+      const payload = {};
+
+      // inputs / selects
+      item.querySelectorAll('input[data-k], textarea[data-k]').forEach(el => {
+        const k = el.getAttribute("data-k");
+        if (!k) return;
+
+        if (el.type === "checkbox") {
+          payload[k] = el.checked;
+          return;
+        }
+
+        // números específicos
+        if (["plazas_min","plazas_max","valoracion_interna","lat","lng"].includes(k)) {
+          const v = (el.value || "").toString().trim();
+          payload[k] = (v === "") ? null : Number(v);
+          if (payload[k] !== null && !Number.isFinite(payload[k])) payload[k] = null;
+          return;
+        }
+
+        // texto
+        const v = (el.value || "").toString().trim();
+        payload[k] = v === "" ? "Sin información" : v;
+      });
+
+      // Aseguramos que nombre nunca se quede vacío
+      if (!payload.nombre || payload.nombre === "Sin información") {
+        payload.nombre = "Instalación sin nombre";
+      }
+
+      return payload;
+    }
+
+    function escapeHtml(str) {
+      return (str || "").toString()
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
 </body>
 </html>
